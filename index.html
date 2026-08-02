@@ -496,10 +496,10 @@
       </div>
     </section>
 
-    <!-- ===================== VISTA PELUQUERO ===================== -->
-    <section class="panel" id="panel-peluquero">
+    <!-- ===================== VISTA BARBERO ===================== -->
+    <section class="panel" id="panel-Barbero">
       <div class="card" id="barberLock">
-        <h2>Acceso del peluquero</h2>
+        <h2>Acceso del Barbero</h2>
         <div class="field">
           <label for="barberSecretInput">Clave De Admin</label>
           <input type="text" id="barberSecretInput" placeholder="Ingresa tu clave secreta" required>
@@ -667,7 +667,7 @@
   // antes de que exista una URL de Apps Script configurada (todavía no hay servidor
   // contra el cual validar nada). Cámbialo aquí si deseas usar uno distinto.
   // Apenas configures la URL, este PIN deja de funcionar: a partir de ahí, entrar a
-  // Configuración exige tu clave de peluquero real, validada en el servidor.
+  // Configuración exige tu clave de Admin real, validada en el servidor.
   const DEFAULT_SETUP_PIN = '1234';
   const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const DIAS_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -683,7 +683,7 @@
   };
 
   let config = {...defaultConfig};
-  let workingCutTypes = []; // copia editable en el panel del peluquero, antes de guardar
+  let workingCutTypes = []; // copia editable en el panel del Barbero, antes de guardar
   let appointments = [];
   let selectedTime = null;
   let refreshTimer = null;
@@ -719,7 +719,7 @@
     pinInput.value = '';
     pinStatus.innerHTML = '';
     pinDesc.textContent = apiReady
-      ? 'Ingresa tu clave de peluquero para abrir la configuración técnica.'
+      ? 'Ingresa tu clave de Barbero para abrir la configuración técnica.'
       : 'Primera vez: ingresa el PIN predeterminado (' + DEFAULT_SETUP_PIN + ') para pegar la URL de tu Apps Script.';
     pinOverlay.classList.add('open');
     pinInput.focus();
@@ -743,7 +743,7 @@
       return;
     }
 
-    // ya hay servidor conectado: misma validación real que el modo peluquero
+    // ya hay servidor conectado: misma validación real que el modo Barbero
     pinStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Verificando...</div>';
     try{
       const ok = await checkSecretOnServer(typed);
@@ -846,7 +846,7 @@
   }
 
   // Verifica una clave contra el servidor (misma validación para el candado de
-  // peluquero y para la configuración técnica). Devuelve true/false.
+  // Barbero y para la configuración técnica). Devuelve true/false.
   async function checkSecretOnServer(candidate){
     const res = await fetch(SHEETS_API_URL, {
       method:'POST',
@@ -930,7 +930,7 @@
       document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById('panel-'+tab.dataset.view).classList.add('active');
-      if(tab.dataset.view === 'peluquero'){
+      if(tab.dataset.view === 'Barbero'){
         if(barberSecret){ autoUnlockIfPossible(); } else { showBarberLock(); }
       }
     });
@@ -946,7 +946,7 @@
     const names = config.days.slice().sort().map(d=>DIAS_LARGO[d]);
     document.getElementById('daysHelper').textContent = names.length
       ? 'Días de atención: ' + names.join(', ')
-      : 'El peluquero todavía no configuró sus días de atención.';
+      : 'El Barbero todavía no configuró sus días de atención.';
   }
 
   function renderCutTypeOptions(){
@@ -1000,7 +1000,7 @@
     if(!dateStr) return;
 
     if(!config.days.includes(dateToWeekday(dateStr))){
-      msgEl.innerHTML = '<div class="msg warn">El peluquero no atiende ese día. Elige otra fecha.</div>';
+      msgEl.innerHTML = '<div class="msg warn">El Barbero no atiende ese día. Elige otra fecha.</div>';
       return;
     }
     if(config.blocked.includes(dateStr)){
@@ -1012,7 +1012,7 @@
     const takenTimes = appointments.filter(a=>a.date===dateStr).map(a=>a.time);
 
     if(allSlots.length === 0){
-      msgEl.innerHTML = '<div class="msg warn">El peluquero todavía no configuró un horario válido.</div>';
+      msgEl.innerHTML = '<div class="msg warn">El Barbero todavía no configuró un horario válido.</div>';
       return;
     }
 
@@ -1363,7 +1363,7 @@
     if(!dateStr || !rescheduleTarget) return;
 
     if(!config.days.includes(dateToWeekday(dateStr))){
-      rescheduleStatus.innerHTML = '<div class="msg warn">El peluquero no atiende ese día.</div>';
+      rescheduleStatus.innerHTML = '<div class="msg warn">El Barbero no atiende ese día.</div>';
       return;
     }
     if(config.blocked.includes(dateStr)){
