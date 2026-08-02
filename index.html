@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turnos · Barbería</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1E2A38;
+    --paper:#F4EFE3;
+    --paper-dim:#E9E1CE;
+    --red:#9F2B2B;
+    --red-light:#C6483F;
+    --blue:#2F5D73;
+    --gold:#B8933F;
+    --line: rgba(30,42,56,0.18);
+    --ok:#4C7A4A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+  }
+  .stripe{
+    height:10px;
+    background:repeating-linear-gradient(
+      -45deg,
+      var(--red), var(--red) 12px,
+      var(--paper) 12px, var(--paper) 24px,
+      var(--blue) 24px, var(--blue) 36px,
+      var(--paper) 36px, var(--paper) 48px
+    );
+  }
+  .app{
+    max-width:900px;
+    margin:0 auto;
+    background:var(--paper);
+    min-height:100vh;
+    box-shadow:0 0 60px rgba(0,0,0,0.35);
+  }
+  header{
+    padding:36px 28px 20px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .settings-btn{
+    position:absolute;
+    top:20px;
+    right:20px;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:all .15s ease;
+  }
+  .settings-btn:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .settings-btn svg{ width:18px; height:18px; }
+  header .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:6px;
+  }
+  header h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:52px;
+    letter-spacing:0.03em;
+    margin:0;
+    color:var(--ink);
+    line-height:1;
+  }
+  header .sub{
+    font-size:14px;
+    color:#5b6672;
+    margin-top:8px;
+  }
+  .tabs{
+    display:flex;
+    justify-content:center;
+    gap:0;
+    border-bottom:1px solid var(--line);
+    background:var(--paper-dim);
+  }
+  .tab{
+    flex:1;
+    max-width:260px;
+    padding:16px 12px;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    border:none;
+    background:transparent;
+    color:#5b6672;
+    border-bottom:3px solid transparent;
+    transition:all .15s ease;
+  }
+  .tab:hover{ color:var(--ink); }
+  .tab.active{
+    color:var(--red);
+    border-bottom-color:var(--red);
+    background:var(--paper);
+    font-weight:600;
+  }
+  .tab:focus-visible{ outline:2px solid var(--blue); outline-offset:-2px; }
+  main{ padding:28px; }
+  .panel{
+    display:none;
+    animation:fade .25s ease;
+  }
+  .panel.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px;
+    margin-bottom:20px;
+  }
+  .card h2{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:24px;
+    letter-spacing:0.02em;
+    margin:0 0 16px;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .card h2::before{
+    content:"";
+    width:6px; height:22px;
+    background:var(--red);
+    display:inline-block;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:#5b6672;
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=date], input[type=number], select{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-family:'Work Sans', sans-serif;
+    font-size:15px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible{
+    outline:2px solid var(--blue);
+    outline-offset:1px;
+  }
+  .field{ margin-bottom:16px; }
+  .row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .row > .field{ flex:1; min-width:140px; }
+
+  .days-grid{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .day-chip{
+    padding:9px 14px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    background:var(--paper);
+    font-size:13px;
+    cursor:pointer;
+    user-select:none;
+    transition:all .12s ease;
+  }
+  .day-chip.on{
+    background:var(--blue);
+    border-color:var(--blue);
+    color:#fff;
+    font-weight:600;
+  }
+
+  .slots-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(90px,1fr));
+    gap:10px;
+    margin-top:6px;
+  }
+  .slot{
+    padding:10px 6px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    text-align:center;
+    cursor:pointer;
+  }
+  .slot:hover{ border-color:var(--blue); }
+  .slot.selected{
+    background:var(--red);
+    border-color:var(--red);
+    color:#fff;
+    font-weight:600;
+  }
+  .slot.taken{
+    text-decoration:line-through;
+    color:#b5aea0;
+    cursor:not-allowed;
+    background:var(--paper-dim);
+  }
+
+  .btn{
+    display:inline-block;
+    padding:13px 24px;
+    border:none;
+    border-radius:3px;
+    background:var(--red);
+    color:#fff;
+    font-family:'Work Sans', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.03em;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .btn:hover{ background:var(--red-light); }
+  .btn:disabled{ background:#c9c2b2; cursor:not-allowed; }
+  .btn.secondary{
+    background:transparent;
+    border:1px solid var(--ink);
+    color:var(--ink);
+  }
+  .btn.secondary:hover{ background:var(--ink); color:#fff; }
+  .btn.small{ padding:7px 14px; font-size:12px; }
+
+  .msg{
+    padding:12px 14px;
+    border-radius:3px;
+    font-size:14px;
+    margin-bottom:16px;
+  }
+  .msg.ok{ background:#e9f2e8; color:var(--ok); border:1px solid #b9d4b6; }
+  .msg.warn{ background:#faf0dc; color:#8a6a1f; border:1px solid #e3c988; }
+  .msg.err{ background:#fbe9e7; color:var(--red); border:1px solid #e6b3ab; }
+
+  /* Ticket stub */
+  .ticket{
+    position:relative;
+    display:flex;
+    background:var(--paper);
+    border:1px dashed #b5aea0;
+    border-radius:4px;
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .ticket-main{
+    flex:1;
+    padding:14px 16px;
+  }
+  .ticket-stub{
+    width:96px;
+    flex-shrink:0;
+    background:var(--ink);
+    color:var(--paper);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    position:relative;
+    text-align:center;
+    padding:6px;
+  }
+  .ticket-stub::before{
+    content:"";
+    position:absolute;
+    left:-6px; top:50%;
+    width:12px; height:12px;
+    background:var(--paper-dim);
+    border-radius:50%;
+    transform:translateY(-50%);
+    box-shadow:0 -22px 0 var(--paper-dim), 0 22px 0 var(--paper-dim);
+  }
+  .ticket-stub .num{ font-size:10px; opacity:.7; }
+  .ticket-stub .time{ font-size:17px; font-weight:600; }
+  .ticket-name{ font-weight:700; font-size:15px; margin-bottom:2px; }
+  .ticket-date{ font-size:12px; color:#5b6672; font-family:'IBM Plex Mono', monospace; }
+  .ticket-cut-tag{
+    display:inline-block;
+    margin-top:6px;
+    padding:3px 9px;
+    background:var(--paper-dim);
+    border-radius:12px;
+    font-size:11px;
+    color:var(--blue);
+    font-weight:600;
+  }
+  .ticket-actions{ margin-top:8px; }
+
+  .blocked-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .blocked-chip{
+    display:flex; align-items:center; gap:8px;
+    padding:6px 10px;
+    background:var(--paper-dim);
+    border-radius:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+  }
+  .blocked-chip button{
+    background:none; border:none; color:var(--red);
+    cursor:pointer; font-size:14px; line-height:1; padding:0;
+  }
+
+  .empty{
+    text-align:center;
+    padding:32px 16px;
+    color:#8a8375;
+    font-size:14px;
+  }
+
+  .helper{ font-size:12px; color:#8a8375; margin-top:4px; }
+  .required-mark{ color:var(--red); }
+
+  footer{
+    text-align:center;
+    padding:20px;
+    font-size:11px;
+    color:#8a8375;
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  .spinner{
+    display:inline-block;
+    width:14px; height:14px;
+    border:2px solid var(--line);
+    border-top-color:var(--red);
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    vertical-align:middle;
+    margin-right:6px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  @media (max-width:520px){
+    header h1{ font-size:38px; }
+    .tab{ font-size:11px; padding:14px 6px; }
+    .ticket-stub{ width:76px; }
+    .settings-btn{ top:14px; right:14px; width:34px; height:34px; }
+  }
+
+  /* Modal de configuración */
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(30,42,56,0.55);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background:#fff;
+    border-radius:6px;
+    max-width:480px;
+    width:100%;
+    padding:26px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal h3{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:26px;
+    letter-spacing:0.02em;
+    margin:0 0 6px;
+    color:var(--ink);
+  }
+  .modal .modal-desc{
+    font-size:13px;
+    color:#5b6672;
+    margin-bottom:18px;
+    line-height:1.5;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+  .modal-status{
+    font-size:13px;
+    margin-top:10px;
+  }
+  .modal-close{
+    position:absolute;
+    top:14px;
+    right:16px;
+    background:none;
+    border:none;
+    font-size:20px;
+    cursor:pointer;
+    color:#8a8375;
+    line-height:1;
+  }
+  .modal{ position:relative; }
+</style>
+</head>
+<body>
+<div class="stripe"></div>
+<div class="app">
+  <header>
+    <button class="settings-btn" id="openSettingsBtn" aria-label="Configuración" title="Configuración">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
+    <div class="eyebrow">Reserva de turnos</div>
+    <h1 id="shopTitle">Barbería</h1>
+    <div class="sub" id="shopSub">Elige el día, la hora y el tipo de corte</div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="cliente">Soy cliente</button>
+    <button class="tab" data-view="peluquero">Soy el peluquero</button>
+  </nav>
+
+  <main>
+    <div id="setupWarning" style="display:none;" class="msg err"></div>
+
+    <!-- ===================== VISTA CLIENTE ===================== -->
+    <section class="panel active" id="panel-cliente">
+      <div class="card">
+        <h2>Agenda tu turno</h2>
+        <div class="helper" style="margin-bottom:14px;">Todos los campos son obligatorios.</div>
+        <div class="field">
+          <label for="clientName">Tu nombre <span class="required-mark">*</span></label>
+          <input type="text" id="clientName" placeholder="Ej: Juan Pérez" maxlength="60" required>
+        </div>
+        <div class="field">
+          <label for="cutType">Tipo de corte <span class="required-mark">*</span></label>
+          <select id="cutType" required>
+            <option value="">Elige una opción</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="clientEmail">Tu correo electrónico <span class="required-mark">*</span></label>
+          <input type="email" id="clientEmail" placeholder="Ej: juan@correo.com" required>
+          <div class="helper">Le llegará la confirmación y la invitación al calendario a este correo.</div>
+        </div>
+        <div class="field">
+          <label for="clientDate">Elige una fecha <span class="required-mark">*</span></label>
+          <input type="date" id="clientDate" required>
+          <div class="helper" id="daysHelper"></div>
+        </div>
+        <div id="clientDateMsg"></div>
+        <div id="slotsWrap" style="display:none;">
+          <label>Horarios disponibles <span class="required-mark">*</span></label>
+          <div class="slots-grid" id="slotsGrid"></div>
+        </div>
+        <div style="margin-top:18px;">
+          <button class="btn" id="bookBtn" disabled>Confirmar turno</button>
+        </div>
+        <div id="bookMsg"></div>
+      </div>
+
+      <div class="card">
+        <h2>Buscar mis turnos</h2>
+        <div class="row">
+          <div class="field">
+            <input type="text" id="lookupName" placeholder="Escribe tu nombre para ver tus turnos">
+          </div>
+          <div class="field" style="flex:0 0 auto;">
+            <button class="btn secondary" id="lookupBtn">Buscar</button>
+          </div>
+        </div>
+        <div id="lookupResults"></div>
+      </div>
+    </section>
+
+    <!-- ===================== VISTA PELUQUERO ===================== -->
+    <section class="panel" id="panel-peluquero">
+      <div class="card" id="barberLock">
+        <h2>Acceso del peluquero</h2>
+        <div class="field">
+          <label for="barberSecretInput">Clave de peluquero</label>
+          <input type="text" id="barberSecretInput" placeholder="Ingresa tu clave secreta" required>
+        </div>
+        <button class="btn" id="unlockBtn">Entrar</button>
+        <div id="unlockMsg"></div>
+      </div>
+
+      <div id="barberContent" style="display:none;">
+      <div class="card">
+        <h2>Configuración de la barbería</h2>
+        <div class="helper" style="margin-bottom:14px;">Todos los campos son obligatorios.</div>
+        <div class="field">
+          <label for="barberNameInput">Nombre de la barbería <span class="required-mark">*</span></label>
+          <input type="text" id="barberNameInput" placeholder="Ej: Barbería El Corte" required>
+        </div>
+
+        <label>Días de atención <span class="required-mark">*</span></label>
+        <div class="days-grid" id="daysGrid"></div>
+
+        <div class="field">
+          <label for="cutTypeInput">Tipos de corte que ofreces <span class="required-mark">*</span></label>
+          <div class="row">
+            <div class="field"><input type="text" id="cutTypeInput" placeholder="Ej: Corte + barba"></div>
+            <div class="field" style="flex:0 0 auto;">
+              <button class="btn secondary small" id="addCutTypeBtn">Agregar</button>
+            </div>
+          </div>
+          <div class="blocked-list" id="cutTypesList"></div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="startHour">Hora de inicio <span class="required-mark">*</span></label>
+            <input type="number" id="startHour" min="0" max="23" required>
+          </div>
+          <div class="field">
+            <label for="endHour">Hora de fin <span class="required-mark">*</span></label>
+            <input type="number" id="endHour" min="1" max="24" required>
+          </div>
+          <div class="field">
+            <label for="slotMin">Duración del turno <span class="required-mark">*</span></label>
+            <select id="slotMin" required>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60">60 min</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="blockDate">Bloquear una fecha puntual (feriado, día libre)</label>
+          <div class="row">
+            <div class="field"><input type="date" id="blockDate"></div>
+            <div class="field" style="flex:0 0 auto;">
+              <button class="btn secondary small" id="blockBtn">Bloquear día</button>
+            </div>
+          </div>
+          <div class="blocked-list" id="blockedList"></div>
+        </div>
+
+        <button class="btn" id="saveConfigBtn">Guardar configuración</button>
+        <div id="configMsg"></div>
+      </div>
+
+      <div class="card">
+        <h2>Turnos agendados</h2>
+        <div class="row">
+          <div class="field">
+            <label for="filterName">Buscar por nombre</label>
+            <input type="text" id="filterName" placeholder="Ej: Juan">
+          </div>
+          <div class="field">
+            <label for="filterDate">Filtrar por fecha</label>
+            <input type="date" id="filterDate">
+          </div>
+          <div class="field" style="flex:0 0 auto; align-self:flex-end;">
+            <button class="btn secondary" id="clearFiltersBtn">Limpiar</button>
+          </div>
+        </div>
+        <div id="appointmentsList"></div>
+      </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="syncFooter">Los datos se guardan en tu Hoja de cálculo de Google</footer>
+</div>
+
+<div class="modal-overlay" id="pinOverlay">
+  <div class="modal">
+    <button class="modal-close" id="closePinBtn" aria-label="Cerrar">✕</button>
+    <h3>Acceso restringido</h3>
+    <div class="modal-desc" id="pinDesc">
+      Ingresa tu PIN para abrir la configuración técnica.
+    </div>
+    <div class="field">
+      <label for="pinInput">PIN</label>
+      <input type="text" id="pinInput" placeholder="••••" inputmode="numeric" required>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="pinContinueBtn">Continuar</button>
+    </div>
+    <div class="modal-status" id="pinStatus"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal">
+    <button class="modal-close" id="closeSettingsBtn" aria-label="Cerrar">✕</button>
+    <h3>Configuración</h3>
+    <div class="modal-desc">
+      Pega la URL de tu Apps Script Web App (la que copiaste al implementarlo en Google Sheets). Quedará guardada en este navegador.
+    </div>
+    <div class="field">
+      <label for="sheetsUrlInput">URL de Google Sheets (Apps Script)</label>
+      <input type="text" id="sheetsUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="saveSettingsBtn">Guardar</button>
+      <button class="btn secondary" id="testSettingsBtn">Probar conexión</button>
+    </div>
+    <div class="modal-status" id="settingsStatus"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="rescheduleOverlay">
+  <div class="modal">
+    <button class="modal-close" id="closeRescheduleBtn" aria-label="Cerrar">✕</button>
+    <h3>Reprogramar turno</h3>
+    <div class="modal-desc" id="rescheduleDesc"></div>
+    <div class="field">
+      <label for="rescheduleDate">Nueva fecha</label>
+      <input type="date" id="rescheduleDate">
+    </div>
+    <label>Nuevo horario</label>
+    <div class="slots-grid" id="rescheduleSlotsGrid"></div>
+    <div class="modal-actions">
+      <button class="btn" id="rescheduleConfirmBtn" disabled>Confirmar cambio</button>
+      <button class="btn secondary" id="rescheduleCancelBtn">Cancelar</button>
+    </div>
+    <div class="modal-status" id="rescheduleStatus"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmBookOverlay">
+  <div class="modal">
+    <button class="modal-close" id="closeConfirmBookBtn" aria-label="Cerrar">✕</button>
+    <h3>¿Desea programar su turno?</h3>
+    <div class="modal-desc" id="confirmBookDesc"></div>
+    <div class="modal-actions">
+      <button class="btn" id="confirmBookYesBtn">Sí, confirmar turno</button>
+      <button class="btn secondary" id="confirmBookNoBtn">Volver</button>
+    </div>
+    <div class="modal-status" id="confirmBookStatus"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'barbershop:sheetsApiUrl';
+  const SECRET_KEY = 'barbershop:barberSecret';
+  // PIN predeterminado: SOLO sirve para entrar a Configuración la primerísima vez,
+  // antes de que exista una URL de Apps Script configurada (todavía no hay servidor
+  // contra el cual validar nada). Cámbialo aquí si deseas usar uno distinto.
+  // Apenas configures la URL, este PIN deja de funcionar: a partir de ahí, entrar a
+  // Configuración exige tu clave de peluquero real, validada en el servidor.
+  const DEFAULT_SETUP_PIN = '1234';
+  const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const DIAS_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+  const defaultConfig = {
+    barberName: 'Barbería',
+    days: [1,2,3,4,5,6],
+    startHour: 9,
+    endHour: 19,
+    slotMin: 30,
+    blocked: [],
+    cutTypes: ['Corte clásico', 'Fade', 'Corte + barba']
+  };
+
+  let config = {...defaultConfig};
+  let workingCutTypes = []; // copia editable en el panel del peluquero, antes de guardar
+  let appointments = [];
+  let selectedTime = null;
+  let refreshTimer = null;
+
+  // La URL se guarda en el navegador (localStorage) al configurarla desde el botón de ajustes.
+  // Si tu navegador la bloquea (poco común), queda solo en memoria durante esta sesión.
+  let SHEETS_API_URL = '';
+  try{ SHEETS_API_URL = localStorage.getItem(STORAGE_KEY) || ''; }catch(e){ SHEETS_API_URL = ''; }
+
+  let apiReady = SHEETS_API_URL && SHEETS_API_URL.indexOf('http') === 0;
+
+  let barberSecret = '';
+  try{ barberSecret = localStorage.getItem(SECRET_KEY) || ''; }catch(e){ barberSecret = ''; }
+
+  function refreshSetupWarning(){
+    const w = document.getElementById('setupWarning');
+    if(!apiReady){
+      w.style.display = 'block';
+      w.textContent = 'Todavía no se configuró la conexión con Google Sheets. Toca el botón ⚙ de arriba y pega la URL de tu Apps Script Web App.';
+    }else{
+      w.style.display = 'none';
+    }
+  }
+  refreshSetupWarning();
+
+  // ---------- PIN de acceso a Configuración técnica ----------
+  const pinOverlay = document.getElementById('pinOverlay');
+  const pinInput = document.getElementById('pinInput');
+  const pinStatus = document.getElementById('pinStatus');
+  const pinDesc = document.getElementById('pinDesc');
+
+  function requestPinThenOpenSettings(){
+    pinInput.value = '';
+    pinStatus.innerHTML = '';
+    pinDesc.textContent = apiReady
+      ? 'Ingresa tu clave de peluquero para abrir la configuración técnica.'
+      : 'Primera vez: ingresa el PIN predeterminado (' + DEFAULT_SETUP_PIN + ') para pegar la URL de tu Apps Script.';
+    pinOverlay.classList.add('open');
+    pinInput.focus();
+  }
+  function closePinModal(){ pinOverlay.classList.remove('open'); }
+
+  async function submitPin(){
+    const typed = pinInput.value.trim();
+    if(!typed){ return; }
+
+    if(!apiReady){
+      // todavía no hay servidor contra el cual validar: solo acepta el PIN predeterminado
+      if(typed === DEFAULT_SETUP_PIN){
+        closePinModal();
+        openSettings();
+      }else{
+        pinStatus.innerHTML = '<span style="color:var(--red)">PIN incorrecto.</span>';
+        pinInput.value = '';
+        pinInput.focus();
+      }
+      return;
+    }
+
+    // ya hay servidor conectado: misma validación real que el modo peluquero
+    pinStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Verificando...</div>';
+    try{
+      const ok = await checkSecretOnServer(typed);
+      if(ok){
+        barberSecret = typed;
+        try{ localStorage.setItem(SECRET_KEY, typed); }catch(e){}
+        closePinModal();
+        openSettings();
+      }else{
+        pinStatus.innerHTML = '<span style="color:var(--red)">Clave incorrecta.</span>';
+        pinInput.value = '';
+        pinInput.focus();
+      }
+    }catch(e){
+      pinStatus.innerHTML = '<span style="color:var(--red)">No se pudo verificar la clave.</span>';
+    }
+  }
+
+  document.getElementById('pinContinueBtn').addEventListener('click', submitPin);
+  document.getElementById('closePinBtn').addEventListener('click', closePinModal);
+  pinOverlay.addEventListener('click', (e)=>{ if(e.target === pinOverlay) closePinModal(); });
+  pinInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') submitPin(); });
+
+  // ---------- modal de configuración ----------
+  const overlay = document.getElementById('settingsOverlay');
+  const urlInput = document.getElementById('sheetsUrlInput');
+  const settingsStatus = document.getElementById('settingsStatus');
+
+  function openSettings(){
+    urlInput.value = SHEETS_API_URL;
+    settingsStatus.innerHTML = '';
+    overlay.classList.add('open');
+    urlInput.focus();
+  }
+  function closeSettings(){ overlay.classList.remove('open'); }
+
+  document.getElementById('openSettingsBtn').addEventListener('click', requestPinThenOpenSettings);
+  document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeSettings(); });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key !== 'Escape') return;
+    if(overlay.classList.contains('open')) closeSettings();
+    if(pinOverlay.classList.contains('open')) closePinModal();
+  });
+
+  document.getElementById('saveSettingsBtn').addEventListener('click', ()=>{
+    const value = urlInput.value.trim();
+    if(!value || value.indexOf('http') !== 0){
+      settingsStatus.innerHTML = '<span style="color:var(--red)">Ingresa una URL válida (debe comenzar con https://).</span>';
+      return;
+    }
+    SHEETS_API_URL = value;
+    apiReady = true;
+    try{ localStorage.setItem(STORAGE_KEY, value); }catch(e){
+      settingsStatus.innerHTML = '<span style="color:var(--red)">No se pudo guardar en este navegador; va a funcionar solo durante esta sesión.</span>';
+    }
+    refreshSetupWarning();
+    settingsStatus.innerHTML = '<span style="color:var(--ok)">Guardado. Cargando datos...</span>';
+    loadAll().then(()=>{
+      settingsStatus.innerHTML = '<span style="color:var(--ok)">Conectado y sincronizado.</span>';
+      startPolling();
+    });
+  });
+
+  document.getElementById('testSettingsBtn').addEventListener('click', async ()=>{
+    const value = urlInput.value.trim();
+    if(!value || value.indexOf('http') !== 0){
+      settingsStatus.innerHTML = '<span style="color:var(--red)">Ingresa una URL válida primero.</span>';
+      return;
+    }
+    settingsStatus.innerHTML = '<span class="spinner"></span>Probando conexión...';
+    try{
+      const res = await fetch(value, { method:'GET' });
+      if(!res.ok) throw new Error('El servidor respondió con error ' + res.status);
+      const data = await res.json();
+      if(!data || !data.config) throw new Error('La respuesta no tiene el formato esperado.');
+      settingsStatus.innerHTML = '<span style="color:var(--ok)">✓ Conexión exitosa. Barbería encontrada: ' + (data.config.barberName || 'sin nombre') + '.</span>';
+    }catch(e){
+      settingsStatus.innerHTML = '<span style="color:var(--red)">✕ No se pudo conectar: ' + e.message + '</span>';
+    }
+  });
+
+  // ---------- API helpers ----------
+  async function apiGet(){
+    const res = await fetch(SHEETS_API_URL, { method:'GET' });
+    if(!res.ok) throw new Error('Error de red al leer datos');
+    return res.json();
+  }
+  async function apiPost(action, payload){
+    const fullPayload = Object.assign({}, payload, { secret: barberSecret });
+    const res = await fetch(SHEETS_API_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' }, // evita preflight CORS
+      body: JSON.stringify({ action, payload: fullPayload })
+    });
+    if(!res.ok) throw new Error('Error de red al guardar datos');
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'Error desconocido');
+    return data;
+  }
+
+  // Verifica una clave contra el servidor (misma validación para el candado de
+  // peluquero y para la configuración técnica). Devuelve true/false.
+  async function checkSecretOnServer(candidate){
+    const res = await fetch(SHEETS_API_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'checkSecret', payload:{ secret: candidate } })
+    });
+    const data = await res.json();
+    return !!data.ok;
+  }
+
+  async function loadAll(){
+    if(!apiReady) return;
+    try{
+      const data = await apiGet();
+      config = {...defaultConfig, ...(data.config||{})};
+      appointments = data.appointments || [];
+    }catch(e){
+      console.error(e);
+    }
+    renderShopHeader();
+    renderClientDaysHelper();
+    renderCutTypeOptions();
+    renderClientDateAvailability();
+    renderBarberConfig();
+    renderAppointmentsList();
+    renderBlockedList();
+  }
+
+  // ---------- barber: lock screen ----------
+  function showBarberLock(){
+    document.getElementById('barberLock').style.display = 'block';
+    document.getElementById('barberContent').style.display = 'none';
+  }
+  function showBarberContent(){
+    document.getElementById('barberLock').style.display = 'none';
+    document.getElementById('barberContent').style.display = 'block';
+  }
+
+  async function tryUnlock(){
+    const msgEl = document.getElementById('unlockMsg');
+    if(!apiReady){
+      msgEl.innerHTML = '<div class="msg err">Primero configurá la URL de Google Sheets (botón ⚙).</div>';
+      return;
+    }
+    const attempt = document.getElementById('barberSecretInput').value.trim();
+    if(!attempt){ return; }
+    msgEl.innerHTML = '<div class="msg"><span class="spinner"></span>Verificando...</div>';
+    try{
+      const ok = await checkSecretOnServer(attempt);
+      if(ok){
+        barberSecret = attempt;
+        try{ localStorage.setItem(SECRET_KEY, attempt); }catch(e){}
+        showBarberContent();
+      }else{
+        msgEl.innerHTML = '<div class="msg err">Clave incorrecta.</div>';
+      }
+    }catch(e){
+      msgEl.innerHTML = '<div class="msg err">No se pudo verificar la clave.</div>';
+    }
+  }
+
+  document.getElementById('unlockBtn').addEventListener('click', tryUnlock);
+  document.getElementById('barberSecretInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter') tryUnlock();
+  });
+
+  // si ya había una clave guardada en este navegador, probarla en silencio al cargar
+  async function autoUnlockIfPossible(){
+    if(!barberSecret || !apiReady) return;
+    try{
+      const ok = await checkSecretOnServer(barberSecret);
+      if(ok) showBarberContent();
+      else barberSecret = '';
+    }catch(e){}
+  }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-'+tab.dataset.view).classList.add('active');
+      if(tab.dataset.view === 'peluquero'){
+        if(barberSecret){ autoUnlockIfPossible(); } else { showBarberLock(); }
+      }
+    });
+  });
+
+  // ---------- header ----------
+  function renderShopHeader(){
+    document.getElementById('shopTitle').textContent = config.barberName || 'Barbería';
+    document.title = (config.barberName || 'Barbería') + ' · Turnos';
+  }
+
+  function renderClientDaysHelper(){
+    const names = config.days.slice().sort().map(d=>DIAS_LARGO[d]);
+    document.getElementById('daysHelper').textContent = names.length
+      ? 'Días de atención: ' + names.join(', ')
+      : 'El peluquero todavía no configuró sus días de atención.';
+  }
+
+  function renderCutTypeOptions(){
+    const select = document.getElementById('cutType');
+    const previous = select.value;
+    select.innerHTML = '<option value="">Elige una opción</option>';
+    (config.cutTypes || []).forEach(ct=>{
+      const opt = document.createElement('option');
+      opt.value = ct;
+      opt.textContent = ct;
+      select.appendChild(opt);
+    });
+    if((config.cutTypes || []).includes(previous)) select.value = previous;
+  }
+
+  // ---------- client: date + slots ----------
+  const clientDateInput = document.getElementById('clientDate');
+  const today = new Date();
+  clientDateInput.min = today.toISOString().slice(0,10);
+
+  clientDateInput.addEventListener('change', renderClientDateAvailability);
+
+  function dateToWeekday(dateStr){
+    const [y,m,d] = dateStr.split('-').map(Number);
+    return new Date(y, m-1, d).getDay();
+  }
+
+  function generateSlotsForDate(){
+    const slots = [];
+    const endTotal = config.endHour * 60;
+    let cur = config.startHour * 60;
+    while(cur + config.slotMin <= endTotal){
+      const hh = Math.floor(cur/60).toString().padStart(2,'0');
+      const mm = (cur%60).toString().padStart(2,'0');
+      slots.push(hh+':'+mm);
+      cur += config.slotMin;
+    }
+    return slots;
+  }
+
+  function renderClientDateAvailability(){
+    const dateStr = clientDateInput.value;
+    const msgEl = document.getElementById('clientDateMsg');
+    const wrap = document.getElementById('slotsWrap');
+    const grid = document.getElementById('slotsGrid');
+    msgEl.innerHTML = '';
+    wrap.style.display = 'none';
+    selectedTime = null;
+    updateBookBtn();
+
+    if(!dateStr) return;
+
+    if(!config.days.includes(dateToWeekday(dateStr))){
+      msgEl.innerHTML = '<div class="msg warn">El peluquero no atiende ese día. Elige otra fecha.</div>';
+      return;
+    }
+    if(config.blocked.includes(dateStr)){
+      msgEl.innerHTML = '<div class="msg warn">Ese día está bloqueado (feriado o día libre). Elige otra fecha.</div>';
+      return;
+    }
+
+    const allSlots = generateSlotsForDate();
+    const takenTimes = appointments.filter(a=>a.date===dateStr).map(a=>a.time);
+
+    if(allSlots.length === 0){
+      msgEl.innerHTML = '<div class="msg warn">El peluquero todavía no configuró un horario válido.</div>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    allSlots.forEach(t=>{
+      const div = document.createElement('div');
+      const taken = takenTimes.includes(t);
+      div.className = 'slot' + (taken ? ' taken' : '');
+      div.textContent = t;
+      if(!taken){
+        div.addEventListener('click', ()=>{
+          document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+          div.classList.add('selected');
+          selectedTime = t;
+          updateBookBtn();
+        });
+      }
+      grid.appendChild(div);
+    });
+
+    wrap.style.display = 'block';
+  }
+
+  function updateBookBtn(){
+    const name = document.getElementById('clientName').value.trim();
+    const cut = document.getElementById('cutType').value;
+    const email = document.getElementById('clientEmail').value.trim();
+    const dateStr = clientDateInput.value;
+    document.getElementById('bookBtn').disabled = !(name && cut && email && dateStr && selectedTime && apiReady);
+  }
+  document.getElementById('clientName').addEventListener('input', updateBookBtn);
+  document.getElementById('cutType').addEventListener('change', updateBookBtn);
+  document.getElementById('clientEmail').addEventListener('input', updateBookBtn);
+
+  // ---------- client: modal de confirmación previo a agendar ----------
+  const confirmBookOverlay = document.getElementById('confirmBookOverlay');
+  const confirmBookStatus = document.getElementById('confirmBookStatus');
+
+  function openConfirmBookModal(){
+    const name = document.getElementById('clientName').value.trim();
+    const cut = document.getElementById('cutType').value;
+    const dateStr = clientDateInput.value;
+    confirmBookStatus.innerHTML = '';
+    document.getElementById('confirmBookDesc').innerHTML =
+      name + ', vas a agendar tu turno para <strong>' + formatDate(dateStr) + '</strong> a las ' +
+      '<strong>' + selectedTime + '</strong>, servicio <strong>' + cut + '</strong>. ¿Desea confirmar?';
+    document.getElementById('confirmBookYesBtn').disabled = false;
+    confirmBookOverlay.classList.add('open');
+  }
+  function closeConfirmBookModal(){ confirmBookOverlay.classList.remove('open'); }
+
+  document.getElementById('closeConfirmBookBtn').addEventListener('click', closeConfirmBookModal);
+  document.getElementById('confirmBookNoBtn').addEventListener('click', closeConfirmBookModal);
+  confirmBookOverlay.addEventListener('click', (e)=>{ if(e.target === confirmBookOverlay) closeConfirmBookModal(); });
+
+  document.getElementById('bookBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('clientName').value.trim();
+    const cut = document.getElementById('cutType').value;
+    const dateStr = clientDateInput.value;
+    if(!name || !cut || !dateStr || !selectedTime) return;
+    openConfirmBookModal();
+  });
+
+  document.getElementById('confirmBookYesBtn').addEventListener('click', async ()=>{
+    const name = document.getElementById('clientName').value.trim();
+    const cut = document.getElementById('cutType').value;
+    const email = document.getElementById('clientEmail').value.trim();
+    const dateStr = clientDateInput.value;
+    const bookMsg = document.getElementById('bookMsg');
+    if(!name || !cut || !dateStr || !selectedTime) return;
+
+    const yesBtn = document.getElementById('confirmBookYesBtn');
+    yesBtn.disabled = true;
+    confirmBookStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Confirmando turno...</div>';
+
+    const btn = document.getElementById('bookBtn');
+    btn.disabled = true;
+
+    try{
+      // re-chequeo por si alguien reservó ese horario mientras tanto
+      const fresh = await apiGet();
+      appointments = fresh.appointments || [];
+      const stillFree = !appointments.some(a=>a.date===dateStr && a.time===selectedTime);
+      if(!stillFree){
+        closeConfirmBookModal();
+        bookMsg.innerHTML = '<div class="msg err">Ese horario acaba de reservarse. Elige otro.</div>';
+        renderClientDateAvailability();
+        return;
+      }
+
+      const result = await apiPost('addAppointment', { date: dateStr, time: selectedTime, client: name, cut, email });
+      appointments.push(result.appointment);
+      closeConfirmBookModal();
+      bookMsg.innerHTML = '<div class="msg ok">¡Turno confirmado! ' + name + ' — ' + formatDate(dateStr) + ' a las ' + selectedTime + ' (' + cut + '). N.° ' + result.appointment.id + '</div>';
+      document.getElementById('clientName').value = '';
+      document.getElementById('cutType').value = '';
+      document.getElementById('clientEmail').value = '';
+      selectedTime = null;
+      renderClientDateAvailability();
+      renderAppointmentsList();
+    }catch(e){
+      confirmBookStatus.innerHTML = '<div class="msg err">No se pudo guardar el turno. ' + e.message + '</div>';
+    }finally{
+      updateBookBtn();
+    }
+  });
+
+  function formatDate(dateStr){
+    const [y,m,d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    return DIAS_LARGO[dt.getDay()] + ' ' + d + '/' + m + '/' + y;
+  }
+
+  // ---------- client: lookup ----------
+  document.getElementById('lookupBtn').addEventListener('click', async ()=>{
+    const results = document.getElementById('lookupResults');
+    const name = document.getElementById('lookupName').value.trim().toLowerCase();
+    if(!name){ results.innerHTML = ''; return; }
+    results.innerHTML = '<div class="msg"><span class="spinner"></span>Buscando...</div>';
+    try{
+      const fresh = await apiGet();
+      appointments = fresh.appointments || [];
+      const mine = appointments
+        .filter(a=>a.client.toLowerCase().includes(name))
+        .sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+      results.innerHTML = mine.length===0
+        ? '<div class="empty">No encontramos turnos con ese nombre.</div>'
+        : mine.map(a => ticketHtml(a, false)).join('');
+    }catch(e){
+      results.innerHTML = '<div class="msg err">No se pudo consultar la información.</div>';
+    }
+  });
+
+  // ---------- barber: days config ----------
+  const daysGrid = document.getElementById('daysGrid');
+  DIAS.forEach((label, idx)=>{
+    const chip = document.createElement('div');
+    chip.className = 'day-chip';
+    chip.textContent = label;
+    chip.dataset.day = idx;
+    chip.addEventListener('click', ()=>{
+      chip.classList.toggle('on');
+    });
+    daysGrid.appendChild(chip);
+  });
+
+  function renderBarberConfig(){
+    document.getElementById('barberNameInput').value = config.barberName;
+    document.getElementById('startHour').value = config.startHour;
+    document.getElementById('endHour').value = config.endHour;
+    document.getElementById('slotMin').value = String(config.slotMin);
+    document.querySelectorAll('.day-chip').forEach(chip=>{
+      const d = Number(chip.dataset.day);
+      chip.classList.toggle('on', config.days.includes(d));
+    });
+    workingCutTypes = (config.cutTypes || []).slice();
+    renderCutTypesList();
+  }
+
+  function renderCutTypesList(){
+    const list = document.getElementById('cutTypesList');
+    if(workingCutTypes.length===0){ list.innerHTML = '<div class="helper">Todavía no agregaste ningún tipo de corte.</div>'; return; }
+    list.innerHTML = workingCutTypes
+      .map((ct, i) => `<span class="blocked-chip">${escapeHtml(ct)} <button data-idx="${i}" aria-label="Quitar">✕</button></span>`)
+      .join('');
+    list.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        workingCutTypes.splice(Number(btn.dataset.idx), 1);
+        renderCutTypesList();
+      });
+    });
+  }
+
+  document.getElementById('addCutTypeBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('cutTypeInput');
+    const value = input.value.trim();
+    if(!value) return;
+    if(!workingCutTypes.includes(value)) workingCutTypes.push(value);
+    input.value = '';
+    renderCutTypesList();
+  });
+  document.getElementById('cutTypeInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('addCutTypeBtn').click(); }
+  });
+
+  document.getElementById('saveConfigBtn').addEventListener('click', async ()=>{
+    const name = document.getElementById('barberNameInput').value.trim() || 'Barbería';
+    const start = Number(document.getElementById('startHour').value);
+    const end = Number(document.getElementById('endHour').value);
+    const slotMin = Number(document.getElementById('slotMin').value);
+    const days = Array.from(document.querySelectorAll('.day-chip.on')).map(c=>Number(c.dataset.day));
+    const msgEl = document.getElementById('configMsg');
+
+    if(isNaN(start) || isNaN(end) || start>=end){
+      msgEl.innerHTML = '<div class="msg err">Revisá el horario: la hora de inicio debe ser menor a la de fin.</div>';
+      return;
+    }
+    if(days.length===0){
+      msgEl.innerHTML = '<div class="msg err">Selecciona al menos un día de atención.</div>';
+      return;
+    }
+    if(workingCutTypes.length===0){
+      msgEl.innerHTML = '<div class="msg err">Agrega al menos un tipo de corte.</div>';
+      return;
+    }
+
+    const newConfig = { barberName:name, startHour:start, endHour:end, slotMin, days, cutTypes: workingCutTypes.slice(), blocked: config.blocked };
+    msgEl.innerHTML = '<div class="msg"><span class="spinner"></span>Guardando...</div>';
+    try{
+      await apiPost('saveConfig', newConfig);
+      config = newConfig;
+      msgEl.innerHTML = '<div class="msg ok">Configuración guardada en la Hoja de cálculo.</div>';
+      renderShopHeader();
+      renderClientDaysHelper();
+      renderCutTypeOptions();
+      renderClientDateAvailability();
+    }catch(e){
+      msgEl.innerHTML = '<div class="msg err">No se pudo guardar. ' + e.message + '</div>';
+    }
+  });
+
+  // ---------- barber: blocked dates ----------
+  function renderBlockedList(){
+    const list = document.getElementById('blockedList');
+    if(config.blocked.length===0){ list.innerHTML = ''; return; }
+    list.innerHTML = config.blocked
+      .slice().sort()
+      .map(d => `<span class="blocked-chip">${formatDate(d)} <button data-date="${d}" aria-label="Quitar bloqueo">✕</button></span>`)
+      .join('');
+    list.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        try{
+          await apiPost('unblockDate', { date: btn.dataset.date });
+          config.blocked = config.blocked.filter(d=>d!==btn.dataset.date);
+          renderBlockedList();
+          renderClientDateAvailability();
+        }catch(e){ console.error(e); }
+      });
+    });
+  }
+
+  document.getElementById('blockBtn').addEventListener('click', async ()=>{
+    const d = document.getElementById('blockDate').value;
+    if(!d) return;
+    try{
+      await apiPost('blockDate', { date: d });
+      if(!config.blocked.includes(d)) config.blocked.push(d);
+      document.getElementById('blockDate').value = '';
+      renderBlockedList();
+      renderClientDateAvailability();
+    }catch(e){ console.error(e); }
+  });
+
+  // ---------- barber: appointments list ----------
+  function ticketHtml(a, withCancel){
+    return `
+      <div class="ticket">
+        <div class="ticket-main">
+          <div class="ticket-name">${escapeHtml(a.client)}</div>
+          <div class="ticket-date">${formatDate(a.date)} · ${a.time} · ${a.id}</div>
+          <span class="ticket-cut-tag">${escapeHtml(a.cut || 'Sin especificar')}</span>
+          ${withCancel ? `<div class="ticket-actions"><button class="btn secondary small" data-reschedule="${a.id}">Reprogramar</button> <button class="btn secondary small" data-cancel="${a.id}">Cancelar turno</button></div>` : ''}
+        </div>
+        <div class="ticket-stub">
+          <div class="num">${a.id.replace('APT-','')}</div>
+          <div class="time">${a.time}</div>
+        </div>
+      </div>`;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderAppointmentsList(){
+    const el = document.getElementById('appointmentsList');
+    const nameFilter = document.getElementById('filterName').value.trim().toLowerCase();
+    const dateFilter = document.getElementById('filterDate').value;
+
+    let upcoming = appointments
+      .filter(a => a.date >= today.toISOString().slice(0,10))
+      .sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+
+    if(nameFilter){
+      upcoming = upcoming.filter(a => a.client.toLowerCase().includes(nameFilter));
+    }
+    if(dateFilter){
+      upcoming = upcoming.filter(a => a.date === dateFilter);
+    }
+
+    if(upcoming.length===0){
+      const hayFiltro = nameFilter || dateFilter;
+      el.innerHTML = '<div class="empty">' + (hayFiltro
+        ? 'No hay turnos que coincidan con ese filtro.'
+        : 'Todavía no hay turnos agendados.') + '</div>';
+      return;
+    }
+    el.innerHTML = upcoming.map(a=>ticketHtml(a, true)).join('');
+    el.querySelectorAll('[data-cancel]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        try{
+          await apiPost('cancelAppointment', { id: btn.dataset.cancel });
+          appointments = appointments.filter(a=>a.id !== btn.dataset.cancel);
+          renderAppointmentsList();
+          renderClientDateAvailability();
+        }catch(e){ console.error(e); }
+      });
+    });
+    el.querySelectorAll('[data-reschedule]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const apt = appointments.find(a=>a.id === btn.dataset.reschedule);
+        if(apt) openRescheduleModal(apt);
+      });
+    });
+  }
+
+  // ---------- barber: reprogramar turno ----------
+  const rescheduleOverlay = document.getElementById('rescheduleOverlay');
+  const rescheduleDateInput = document.getElementById('rescheduleDate');
+  const rescheduleSlotsGrid = document.getElementById('rescheduleSlotsGrid');
+  const rescheduleStatus = document.getElementById('rescheduleStatus');
+  let rescheduleTarget = null;
+  let rescheduleSelectedTime = null;
+
+  function openRescheduleModal(apt){
+    rescheduleTarget = apt;
+    rescheduleSelectedTime = null;
+    rescheduleStatus.innerHTML = '';
+    document.getElementById('rescheduleDesc').textContent =
+      'Turno de ' + apt.client + ' (' + (apt.cut || 'sin especificar') + ') — actualmente el ' +
+      formatDate(apt.date) + ' a las ' + apt.time + '.';
+    rescheduleDateInput.min = today.toISOString().slice(0,10);
+    rescheduleDateInput.value = apt.date;
+    document.getElementById('rescheduleConfirmBtn').disabled = true;
+    renderRescheduleSlots();
+    rescheduleOverlay.classList.add('open');
+  }
+  function closeRescheduleModal(){
+    rescheduleOverlay.classList.remove('open');
+    rescheduleTarget = null;
+  }
+
+  function renderRescheduleSlots(){
+    const dateStr = rescheduleDateInput.value;
+    rescheduleSlotsGrid.innerHTML = '';
+    rescheduleSelectedTime = null;
+    document.getElementById('rescheduleConfirmBtn').disabled = true;
+    if(!dateStr || !rescheduleTarget) return;
+
+    if(!config.days.includes(dateToWeekday(dateStr))){
+      rescheduleStatus.innerHTML = '<div class="msg warn">El peluquero no atiende ese día.</div>';
+      return;
+    }
+    if(config.blocked.includes(dateStr)){
+      rescheduleStatus.innerHTML = '<div class="msg warn">Ese día está bloqueado.</div>';
+      return;
+    }
+    rescheduleStatus.innerHTML = '';
+
+    const allSlots = generateSlotsForDate();
+    const takenTimes = appointments
+      .filter(a => a.id !== rescheduleTarget.id && a.date === dateStr)
+      .map(a => a.time);
+
+    allSlots.forEach(t=>{
+      const div = document.createElement('div');
+      const taken = takenTimes.includes(t);
+      const isCurrent = dateStr === rescheduleTarget.date && t === rescheduleTarget.time;
+      div.className = 'slot' + (taken ? ' taken' : '');
+      div.textContent = t + (isCurrent ? ' (actual)' : '');
+      if(!taken){
+        div.addEventListener('click', ()=>{
+          rescheduleSlotsGrid.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+          div.classList.add('selected');
+          rescheduleSelectedTime = t;
+          document.getElementById('rescheduleConfirmBtn').disabled = false;
+        });
+      }
+      rescheduleSlotsGrid.appendChild(div);
+    });
+  }
+
+  rescheduleDateInput.addEventListener('change', renderRescheduleSlots);
+
+  document.getElementById('rescheduleConfirmBtn').addEventListener('click', async ()=>{
+    if(!rescheduleTarget || !rescheduleSelectedTime) return;
+    const dateStr = rescheduleDateInput.value;
+    rescheduleStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Reprogramando...</div>';
+    try{
+      await apiPost('rescheduleAppointment', { id: rescheduleTarget.id, date: dateStr, time: rescheduleSelectedTime });
+      appointments = appointments.map(a => a.id === rescheduleTarget.id
+        ? Object.assign({}, a, { date: dateStr, time: rescheduleSelectedTime })
+        : a);
+      renderAppointmentsList();
+      renderClientDateAvailability();
+      closeRescheduleModal();
+    }catch(e){
+      rescheduleStatus.innerHTML = '<div class="msg err">No se pudo reprogramar. ' + e.message + '</div>';
+    }
+  });
+
+  document.getElementById('closeRescheduleBtn').addEventListener('click', closeRescheduleModal);
+  document.getElementById('rescheduleCancelBtn').addEventListener('click', closeRescheduleModal);
+  rescheduleOverlay.addEventListener('click', (e)=>{ if(e.target === rescheduleOverlay) closeRescheduleModal(); });
+
+  document.getElementById('filterName').addEventListener('input', renderAppointmentsList);
+  document.getElementById('filterDate').addEventListener('change', renderAppointmentsList);
+  document.getElementById('clearFiltersBtn').addEventListener('click', ()=>{
+    document.getElementById('filterName').value = '';
+    document.getElementById('filterDate').value = '';
+    renderAppointmentsList();
+  });
+
+  // ---------- polling for near-live sync ----------
+  function startPolling(){
+    if(!apiReady) return;
+    if(refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(loadAll, 8000);
+  }
+  document.addEventListener('visibilitychange', ()=>{
+    if(!document.hidden) loadAll();
+  });
+
+  loadAll().then(startPolling);
+})();
+</script>
+</body>
+</html>
