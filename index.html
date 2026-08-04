@@ -21,33 +21,28 @@
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:var(--ink);
+    background:#eef0f4;
     color:var(--ink);
     font-family:'Work Sans', sans-serif;
     min-height:100vh;
   }
   .stripe{
-    height:10px;
-    background:repeating-linear-gradient(
-      -45deg,
-      var(--red), var(--red) 12px,
-      var(--paper) 12px, var(--paper) 24px,
-      var(--blue) 24px, var(--blue) 36px,
-      var(--paper) 36px, var(--paper) 48px
-    );
+    height:3px;
+    background:linear-gradient(90deg, var(--red) 0%, var(--blue) 50%, var(--gold) 100%);
   }
   .app{
-    max-width:900px;
+    max-width:760px;
     margin:0 auto;
-    background:var(--paper);
+    background:#fff;
     min-height:100vh;
-    box-shadow:0 0 60px rgba(0,0,0,0.35);
+    box-shadow:0 8px 40px rgba(30,42,56,0.08);
   }
   header{
-    padding:36px 28px 20px;
+    padding:28px 24px 16px;
     text-align:center;
-    border-bottom:1px solid var(--line);
+    border-bottom:none;
     position:relative;
+    background:#fff;
   }
   .settings-btn{
     position:absolute;
@@ -77,7 +72,7 @@
   }
   header h1{
     font-family:'Bebas Neue', sans-serif;
-    font-size:52px;
+    font-size:44px;
     letter-spacing:0.03em;
     margin:0;
     color:var(--ink);
@@ -85,41 +80,50 @@
   }
   header .sub{
     font-size:14px;
-    color:#5b6672;
-    margin-top:8px;
+    color:#6b7280;
+    margin-top:6px;
+    font-weight:400;
   }
   .tabs{
     display:flex;
     justify-content:center;
-    gap:0;
+    gap:8px;
+    padding:0 20px 16px;
     border-bottom:1px solid var(--line);
-    background:var(--paper-dim);
+    background:#fff;
   }
   .tab{
-    flex:1;
-    max-width:260px;
-    padding:16px 12px;
+    flex:0 1 auto;
+    max-width:none;
+    padding:9px 20px;
     text-align:center;
-    font-family:'IBM Plex Mono', monospace;
+    font-family:'Work Sans', sans-serif;
     font-size:13px;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
+    font-weight:500;
+    letter-spacing:0;
+    text-transform:none;
     cursor:pointer;
-    border:none;
-    background:transparent;
-    color:#5b6672;
-    border-bottom:3px solid transparent;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:#f8f9fb;
+    color:#6b7280;
     transition:all .15s ease;
   }
-  .tab:hover{ color:var(--ink); }
+  .tab:hover{ color:var(--ink); background:#f0f2f5; }
   .tab.active{
-    color:var(--red);
-    border-bottom-color:var(--red);
-    background:var(--paper);
+    color:#fff;
+    border-color:var(--ink);
+    background:var(--ink);
     font-weight:600;
   }
-  .tab:focus-visible{ outline:2px solid var(--blue); outline-offset:-2px; }
-  main{ padding:28px; }
+  .tab:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
+  main{ padding:0; }
+  #panel-peluquero{
+    padding:24px 20px 28px;
+    background:linear-gradient(180deg, #f8f9fc 0%, #eef1f8 100%);
+    min-height:calc(100vh - 168px);
+  }
+  #setupWarning{ margin:16px 20px 0; }
   .panel{
     display:none;
     animation:fade .25s ease;
@@ -129,10 +133,11 @@
 
   .card{
     background:#fff;
-    border:1px solid var(--line);
-    border-radius:4px;
+    border:1px solid #e3e6ee;
+    border-radius:16px;
     padding:22px;
     margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(30,42,56,0.06);
   }
   .card h2{
     font-family:'Bebas Neue', sans-serif;
@@ -146,9 +151,11 @@
   }
   .card h2::before{
     content:"";
-    width:6px; height:22px;
-    background:var(--red);
+    width:10px; height:10px;
+    border-radius:50%;
+    background:linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
     display:inline-block;
+    flex-shrink:0;
   }
   label{
     display:block;
@@ -161,13 +168,20 @@
   }
   input[type=text], input[type=date], input[type=number], select{
     width:100%;
-    padding:11px 12px;
-    border:1px solid var(--line);
-    border-radius:3px;
+    padding:11px 14px;
+    border:1px solid #dde1ea;
+    border-radius:10px;
     font-family:'Work Sans', sans-serif;
     font-size:15px;
-    background:var(--paper);
+    background:#f7f8fb;
     color:var(--ink);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input[type=text]:focus, input[type=date]:focus, input[type=number]:focus, select:focus{
+    outline:none;
+    border-color:#4285f4;
+    box-shadow:0 0 0 3px rgba(66,133,244,0.12);
+    background:#fff;
   }
   input:focus-visible, select:focus-visible, button:focus-visible{
     outline:2px solid var(--blue);
@@ -234,7 +248,7 @@
     display:inline-block;
     padding:13px 24px;
     border:none;
-    border-radius:3px;
+    border-radius:10px;
     background:var(--red);
     color:#fff;
     font-family:'Work Sans', sans-serif;
@@ -242,17 +256,17 @@
     font-size:14px;
     letter-spacing:0.03em;
     cursor:pointer;
-    transition:background .15s ease;
+    transition:background .15s ease, transform .12s ease;
   }
-  .btn:hover{ background:var(--red-light); }
-  .btn:disabled{ background:#c9c2b2; cursor:not-allowed; }
+  .btn:hover{ background:var(--red-light); transform:translateY(-1px); }
+  .btn:disabled{ background:#c9c2b2; cursor:not-allowed; transform:none; }
   .btn.secondary{
     background:transparent;
     border:1px solid var(--ink);
     color:var(--ink);
   }
   .btn.secondary:hover{ background:var(--ink); color:#fff; }
-  .btn.small{ padding:7px 14px; font-size:12px; }
+  .btn.small{ padding:7px 14px; font-size:12px; border-radius:8px; }
 
   .msg{
     padding:12px 14px;
@@ -344,10 +358,12 @@
 
   footer{
     text-align:center;
-    padding:20px;
+    padding:14px 20px 20px;
     font-size:11px;
-    color:#8a8375;
-    font-family:'IBM Plex Mono', monospace;
+    color:#9ca3af;
+    font-family:'Work Sans', sans-serif;
+    background:#fff;
+    border-top:1px solid var(--line);
   }
 
   .spinner{
@@ -363,10 +379,15 @@
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
   @media (max-width:520px){
-    header h1{ font-size:38px; }
-    .tab{ font-size:11px; padding:14px 6px; }
+    header h1{ font-size:34px; }
+    header{ padding:22px 16px 12px; }
+    .tab{ font-size:12px; padding:8px 16px; }
+    .tabs{ padding:0 14px 12px; }
+    #panel-peluquero{ padding:16px 14px 20px; }
     .ticket-stub{ width:76px; }
     .settings-btn{ top:14px; right:14px; width:34px; height:34px; }
+    .chat-app{ height:calc(100vh - 155px); min-height:400px; }
+    .msg-row{ max-width:94%; }
   }
 
   /* Modal de configuración */
@@ -424,85 +445,361 @@
     line-height:1;
   }
   .modal{ position:relative; }
+
+  /* ===== Acceso del peluquero (mismo lenguaje visual que el chat) ===== */
+  #barberLock{
+    max-width:400px;
+    margin:32px auto 0;
+    text-align:center;
+    padding:32px 26px 28px;
+    border-radius:20px;
+  }
+  .lock-avatar{
+    width:56px;
+    height:56px;
+    margin:0 auto 16px;
+    border-radius:50%;
+    background:linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 14px rgba(66,133,244,0.3);
+  }
+  .lock-avatar svg{ width:26px; height:26px; color:#fff; }
+  #barberLock h2{
+    justify-content:center;
+    font-family:'Work Sans', sans-serif;
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:0;
+    margin:0 0 6px;
+  }
+  #barberLock h2::before{ display:none; }
+  #barberLock .lock-sub{
+    font-size:13.5px;
+    color:#6b7280;
+    line-height:1.5;
+    margin:0 0 22px;
+  }
+  #barberLock .field{ text-align:left; }
+  #barberLock input[type=text]{
+    border-radius:28px;
+    padding:13px 18px;
+    background:#f1f3f8;
+    border:1px solid #dde1ea;
+    text-align:center;
+  }
+  #barberLock input[type=text]:focus{
+    background:#fff;
+    text-align:left;
+  }
+  #barberLock .btn{
+    width:100%;
+    border-radius:28px;
+    padding:13px 24px;
+    background:linear-gradient(135deg, #4285f4, #7b61c7);
+    box-shadow:0 3px 10px rgba(66,133,244,0.25);
+  }
+  #barberLock .btn:hover{
+    background:linear-gradient(135deg, #3574e0, #6a50b8);
+    transform:scale(1.015);
+  }
+
+  /* ===== Chatbot estilo Gemini ===== */
+  .chat-app{
+    display:flex;
+    flex-direction:column;
+    height:calc(100vh - 168px);
+    min-height:480px;
+    background:linear-gradient(180deg, #f8f9fc 0%, #eef1f8 100%);
+    border-radius:0;
+    overflow:hidden;
+    border:none;
+  }
+  .chat-messages{
+    flex:1;
+    overflow-y:auto;
+    padding:20px 16px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    scroll-behavior:smooth;
+  }
+  .msg-row{
+    display:flex;
+    gap:10px;
+    max-width:88%;
+    animation:fade .3s ease;
+  }
+  .msg-row.user{
+    align-self:flex-end;
+    flex-direction:row-reverse;
+  }
+  .msg-avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    font-weight:600;
+  }
+  .msg-row.bot .msg-avatar{
+    background:linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
+    color:#fff;
+    box-shadow:0 2px 8px rgba(66,133,244,0.25);
+  }
+  .msg-row.user .msg-avatar{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+  }
+  .msg-bubble{
+    padding:12px 16px;
+    font-size:15px;
+    line-height:1.55;
+    word-break:break-word;
+  }
+  .msg-row.bot .msg-bubble{
+    background:#fff;
+    border:1px solid #e3e6ee;
+    border-radius:4px 20px 20px 20px;
+    box-shadow:0 1px 3px rgba(30,42,56,0.06);
+    color:var(--ink);
+  }
+  .msg-row.user .msg-bubble{
+    background:#dce7fb;
+    color:#1a2744;
+    border-radius:20px 4px 20px 20px;
+  }
+  .msg-bubble strong{ font-weight:600; }
+  .typing-dots{
+    display:inline-flex;
+    gap:4px;
+    padding:4px 0;
+  }
+  .typing-dots span{
+    width:7px; height:7px;
+    background:#9aa0a6;
+    border-radius:50%;
+    animation:typingBounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2){ animation-delay:.15s; }
+  .typing-dots span:nth-child(3){ animation-delay:.3s; }
+  @keyframes typingBounce{
+    0%,60%,100%{ transform:translateY(0); opacity:.4; }
+    30%{ transform:translateY(-5px); opacity:1; }
+  }
+  .chat-input-area{
+    padding:12px 14px 14px;
+    background:#fff;
+    border-top:1px solid #e3e6ee;
+  }
+  .chat-quick-replies{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+    min-height:0;
+  }
+  .chat-quick-replies:empty{ display:none; }
+  .quick-chip{
+    padding:9px 14px;
+    border:1px solid #c5d3f0;
+    border-radius:20px;
+    background:#f0f4ff;
+    color:#1a3a6b;
+    font-size:13px;
+    font-family:'Work Sans', sans-serif;
+    cursor:pointer;
+    transition:all .12s ease;
+    white-space:nowrap;
+  }
+  .quick-chip:hover{
+    background:#4285f4;
+    border-color:#4285f4;
+    color:#fff;
+  }
+  .quick-chip.taken{
+    text-decoration:line-through;
+    opacity:.5;
+    cursor:not-allowed;
+    pointer-events:none;
+  }
+  .chat-input-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    background:#f1f3f8;
+    border:1px solid #dde1ea;
+    border-radius:28px;
+    padding:6px 6px 6px 18px;
+    transition:border-color .15s ease;
+  }
+  .chat-input-row:focus-within{
+    border-color:#4285f4;
+    box-shadow:0 0 0 3px rgba(66,133,244,0.12);
+  }
+  .chat-input-row input{
+    flex:1;
+    border:none;
+    background:transparent;
+    font-family:'Work Sans', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    outline:none;
+    padding:8px 0;
+  }
+  .chat-input-row input::placeholder{ color:#8a9199; }
+  .chat-send-btn{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:none;
+    background:linear-gradient(135deg, #4285f4, #7b61c7);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .chat-send-btn:hover{ transform:scale(1.05); }
+  .chat-send-btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+  .chat-send-btn svg{ width:18px; height:18px; }
+  .chat-widget{
+    margin-top:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .chat-widget input[type=date]{
+    max-width:220px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:'Work Sans', sans-serif;
+    background:#fff;
+  }
+  .chat-slots{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:4px;
+  }
+  .chat-slot{
+    padding:8px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    cursor:pointer;
+    transition:all .12s ease;
+  }
+  .chat-slot:hover{ border-color:#4285f4; background:#eef3ff; }
+  .chat-slot.taken{
+    text-decoration:line-through;
+    opacity:.45;
+    cursor:not-allowed;
+    pointer-events:none;
+  }
+  .chat-ticket{
+    margin-top:8px;
+    padding:10px 12px;
+    background:var(--paper);
+    border:1px dashed #b5aea0;
+    border-radius:6px;
+    font-size:13px;
+  }
+  .wa-banner{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:10px 16px;
+    background:#e7f8ef;
+    border-bottom:1px solid #b8e6cc;
+    font-size:13px;
+    color:#1a5c36;
+  }
+  .wa-banner a{
+    color:#128c47;
+    font-weight:600;
+    text-decoration:none;
+  }
+  .wa-banner a:hover{ text-decoration:underline; }
+  .wa-setup-box{
+    background:#f8f9fb;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px;
+    margin-bottom:14px;
+    font-size:13px;
+    line-height:1.55;
+    color:#5b6672;
+  }
+  .wa-setup-box code{
+    background:#eef1f5;
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:12px;
+  }
+
 </style>
 </head>
 <body>
 <div class="stripe"></div>
-<div class="app">
+<div class="app" id="mainApp">
   <header>
     <button class="settings-btn" id="openSettingsBtn" aria-label="Configuración" title="Configuración">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
     <div class="eyebrow">Reserva de turnos</div>
     <h1 id="shopTitle">Barbería</h1>
-    <div class="sub" id="shopSub">Elige el día, la hora y el tipo de corte</div>
+    <div class="sub" id="shopSub">Chateá con nosotros para agendar tu turno</div>
   </header>
 
   <nav class="tabs">
     <button class="tab active" data-view="cliente">Soy cliente</button>
-    <button class="tab" data-view="Admin">Modo - Admin</button>
+    <button class="tab" data-view="peluquero">Soy el peluquero</button>
   </nav>
 
   <main>
-    <div id="setupWarning" style="display:none;" class="msg err"></div>
+    <div id="setupWarning" style="display:none;" class="msg err" role="alert"></div>
 
-    <!-- ===================== VISTA CLIENTE ===================== -->
+    <!-- ===================== VISTA CLIENTE (Chatbot) ===================== -->
     <section class="panel active" id="panel-cliente">
-      <div class="card">
-        <h2>Agenda tu turno</h2>
-        <div class="helper" style="margin-bottom:14px;">Todos los campos son obligatorios.</div>
-        <div class="field">
-          <label for="clientName">Tu nombre <span class="required-mark">*</span></label>
-          <input type="text" id="clientName" placeholder="Ej: Juan Pérez" maxlength="60" required>
-        </div>
-        <div class="field">
-          <label for="cutType">Tipo de corte <span class="required-mark">*</span></label>
-          <select id="cutType" required>
-            <option value="">Elige una opción</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="clientEmail">Tu correo electrónico <span class="required-mark">*</span></label>
-          <input type="email" id="clientEmail" placeholder="Ej: juan@correo.com" required>
-          <div class="helper">Le llegará la confirmación y la invitación al calendario a este correo.</div>
-        </div>
-        <div class="field">
-          <label for="clientDate">Elige una fecha <span class="required-mark">*</span></label>
-          <input type="date" id="clientDate" required>
-          <div class="helper" id="daysHelper"></div>
-        </div>
-        <div id="clientDateMsg"></div>
-        <div id="slotsWrap" style="display:none;">
-          <label>Horarios disponibles <span class="required-mark">*</span></label>
-          <div class="slots-grid" id="slotsGrid"></div>
-        </div>
-        <div style="margin-top:18px;">
-          <button class="btn" id="bookBtn" disabled>Confirmar turno</button>
-        </div>
-        <div id="bookMsg"></div>
-      </div>
-
-      <div class="card">
-        <h2>Buscar mis turnos</h2>
-        <div class="row">
-          <div class="field">
-            <input type="text" id="lookupName" placeholder="Escribe tu nombre para ver tus turnos">
-          </div>
-          <div class="field" style="flex:0 0 auto;">
-            <button class="btn secondary" id="lookupBtn">Buscar</button>
+      <div id="waBanner" class="wa-banner" style="display:none;"></div>
+      <div class="chat-app">
+        <div class="chat-messages" id="chatMessages" role="log" aria-live="polite"></div>
+        <div class="chat-input-area">
+          <div class="chat-quick-replies" id="chatQuickReplies"></div>
+          <div class="chat-input-row">
+            <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." autocomplete="off" maxlength="120">
+            <button class="chat-send-btn" id="chatSendBtn" aria-label="Enviar" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
           </div>
         </div>
-        <div id="lookupResults"></div>
       </div>
     </section>
 
-    <!-- ===================== VISTA BARBERO ===================== -->
-    <section class="panel" id="panel-Barbero">
+    <!-- ===================== VISTA PELUQUERO ===================== -->
+    <section class="panel" id="panel-peluquero">
       <div class="card" id="barberLock">
-        <h2>Acceso del Barbero</h2>
+        <div class="lock-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <h2>Acceso del equipo</h2>
+        <p class="lock-sub">Esta sección es solo para el peluquero.<br>Ingresá tu clave para abrir el panel.</p>
         <div class="field">
-          <label for="barberSecretInput">Clave De Admin</label>
-          <input type="text" id="barberSecretInput" placeholder="Ingresa tu clave secreta" required>
+          <label for="barberSecretInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Clave de peluquero</label>
+          <input type="text" id="barberSecretInput" placeholder="Tu clave secreta" required>
         </div>
         <button class="btn" id="unlockBtn">Entrar</button>
         <div id="unlockMsg"></div>
@@ -524,11 +821,26 @@
           <label for="cutTypeInput">Tipos de corte que ofreces <span class="required-mark">*</span></label>
           <div class="row">
             <div class="field"><input type="text" id="cutTypeInput" placeholder="Ej: Corte + barba"></div>
+            <div class="field" style="flex:0 0 120px;"><input type="number" id="cutTypePriceInput" placeholder="Precio $" min="0"></div>
             <div class="field" style="flex:0 0 auto;">
               <button class="btn secondary small" id="addCutTypeBtn">Agregar</button>
             </div>
           </div>
+          <div class="helper">El precio es opcional; dejalo en blanco si preferís no mostrarlo.</div>
           <div class="blocked-list" id="cutTypesList"></div>
+        </div>
+
+        <div class="field">
+          <label for="staffNameInput">Peluqueros / sillas (dejar vacío si trabajás solo)</label>
+          <div class="row">
+            <div class="field"><input type="text" id="staffNameInput" placeholder="Nombre del peluquero"></div>
+            <div class="field"><input type="text" id="staffCalendarInput" placeholder="ID de su Google Calendar (opcional)"></div>
+            <div class="field" style="flex:0 0 auto;">
+              <button class="btn secondary small" id="addStaffBtn">Agregar</button>
+            </div>
+          </div>
+          <div class="helper">Si agregás más de uno, los clientes van a poder elegir quién los atiende y cada uno tendrá su propia agenda.</div>
+          <div class="blocked-list" id="staffList"></div>
         </div>
 
         <div class="row">
@@ -551,6 +863,34 @@
           </div>
         </div>
 
+        <div class="row">
+          <div class="field">
+            <label for="reminderHoursBefore">Recordatorio por email (horas antes)</label>
+            <input type="number" id="reminderHoursBefore" min="1" max="72" value="24">
+          </div>
+          <div class="field">
+            <label for="maxBookingsPerEmailPerDay">Máx. reservas por correo/día</label>
+            <input type="number" id="maxBookingsPerEmailPerDay" min="1" max="20" value="3">
+          </div>
+        </div>
+        <div class="helper" style="margin-bottom:14px;">Para que los recordatorios se envíen solos todos los días, hace falta activar el disparador una vez desde el editor de Apps Script (función <code>instalarRecordatorios</code>). Ver instrucciones al inicio de Code.gs.</div>
+
+        <div class="field">
+          <label for="whatsappPhoneInput">WhatsApp de la barbería</label>
+          <input type="text" id="whatsappPhoneInput" placeholder="Ej: 5491123456789 (código país + número, sin +)">
+          <div class="helper">Los clientes podrán reservar por WhatsApp. Con la API de Meta configurada en Apps Script, el bot responde automáticamente.</div>
+        </div>
+
+        <div class="wa-setup-box" id="waSetupBox">
+          <strong>Bot automático de WhatsApp</strong> (opcional)<br>
+          1. Creá una app en <a href="https://developers.facebook.com" target="_blank" rel="noopener">Meta for Developers</a> → WhatsApp → API Setup.<br>
+          2. En Apps Script → Project Settings → Script Properties, agregá:<br>
+          &nbsp;&nbsp;<code>WHATSAPP_TOKEN</code>, <code>WHATSAPP_PHONE_ID</code>, <code>WHATSAPP_VERIFY_TOKEN</code><br>
+          3. En Meta → Webhook, pegá la misma URL <code>/exec</code> de tu Web App y suscribite a <em>messages</em>.<br>
+          Detalle completo al inicio de <code>Code.gs</code>.
+          <div id="waBotStatus" style="margin-top:8px;"></div>
+        </div>
+
         <div class="field">
           <label for="blockDate">Bloquear una fecha puntual (feriado, día libre)</label>
           <div class="row">
@@ -567,6 +907,17 @@
       </div>
 
       <div class="card">
+        <h2>Estadísticas</h2>
+        <div id="statsBox" class="helper">Cargando estadísticas...</div>
+      </div>
+
+      <div class="card">
+        <h2>Lista de espera</h2>
+        <div class="helper" style="margin-bottom:10px;">Clientes anotados para días completos. Se les avisa por correo automáticamente en cuanto se libera un turno ese día.</div>
+        <div id="waitlistPanel"></div>
+      </div>
+
+      <div class="card">
         <h2>Turnos agendados</h2>
         <div class="row">
           <div class="field">
@@ -579,6 +930,9 @@
           </div>
           <div class="field" style="flex:0 0 auto; align-self:flex-end;">
             <button class="btn secondary" id="clearFiltersBtn">Limpiar</button>
+          </div>
+          <div class="field" style="flex:0 0 auto; align-self:flex-end;">
+            <button class="btn secondary" id="exportCsvBtn">Exportar CSV</button>
           </div>
         </div>
         <div id="appointmentsList"></div>
@@ -659,18 +1013,39 @@
   </div>
 </div>
 
+<div id="selfManagePanel" style="display:none;">
+  <div class="stripe"></div>
+  <div class="app">
+    <header>
+      <div class="eyebrow">Gestioná tu turno</div>
+      <h1>Tu turno</h1>
+      <div class="sub">Podés cancelarlo o reprogramarlo desde acá</div>
+    </header>
+    <main>
+      <div class="card" id="selfManageContent"></div>
+    </main>
+    <footer>Los datos se guardan en la Hoja de cálculo de Google de la barbería</footer>
+  </div>
+</div>
+
 <script>
 (function(){
   const STORAGE_KEY = 'barbershop:sheetsApiUrl';
-  const SECRET_KEY = 'barbershop:barberSecret';
+  const TOKEN_KEY = 'barbershop:barberToken';
   // PIN predeterminado: SOLO sirve para entrar a Configuración la primerísima vez,
   // antes de que exista una URL de Apps Script configurada (todavía no hay servidor
   // contra el cual validar nada). Cámbialo aquí si deseas usar uno distinto.
   // Apenas configures la URL, este PIN deja de funcionar: a partir de ahí, entrar a
-  // Configuración exige tu clave de Admin real, validada en el servidor.
+  // Configuración exige tu clave de peluquero real, validada en el servidor.
   const DEFAULT_SETUP_PIN = '1234';
   const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const DIAS_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+  // Pega aquí la URL de tu Apps Script Web App (termina en /exec) una vez que la tengas,
+  // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
+  // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
+  // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
+  const DEFAULT_SHEETS_API_URL = '';
 
   const defaultConfig = {
     barberName: 'Barbería',
@@ -679,24 +1054,39 @@
     endHour: 19,
     slotMin: 30,
     blocked: [],
-    cutTypes: ['Corte clásico', 'Fade', 'Corte + barba']
+    cutTypes: [{name:'Corte clásico', price:0}, {name:'Fade', price:0}, {name:'Corte + barba', price:0}],
+    staff: [{id:'default', name:'', calendarId:''}],
+    reminderHoursBefore: 24,
+    maxBookingsPerEmailPerDay: 3
   };
 
   let config = {...defaultConfig};
-  let workingCutTypes = []; // copia editable en el panel del Barbero, antes de guardar
+  let workingCutTypes = []; // copia editable en el panel del peluquero, antes de guardar
+  let workingStaff = []; // idem para la lista de peluqueros/sillas
   let appointments = [];
   let selectedTime = null;
+  let selectedStaffId = null;
   let refreshTimer = null;
 
   // La URL se guarda en el navegador (localStorage) al configurarla desde el botón de ajustes.
   // Si tu navegador la bloquea (poco común), queda solo en memoria durante esta sesión.
   let SHEETS_API_URL = '';
-  try{ SHEETS_API_URL = localStorage.getItem(STORAGE_KEY) || ''; }catch(e){ SHEETS_API_URL = ''; }
+  try{ SHEETS_API_URL = localStorage.getItem(STORAGE_KEY) || DEFAULT_SHEETS_API_URL || ''; }catch(e){ SHEETS_API_URL = DEFAULT_SHEETS_API_URL || ''; }
 
   let apiReady = SHEETS_API_URL && SHEETS_API_URL.indexOf('http') === 0;
 
-  let barberSecret = '';
-  try{ barberSecret = localStorage.getItem(SECRET_KEY) || ''; }catch(e){ barberSecret = ''; }
+  // Token de sesión del peluquero (nunca guardamos la clave secreta en sí, solo este
+  // token firmado por el servidor que expira solo a las pocas horas).
+  let barberToken = '';
+  try{ barberToken = localStorage.getItem(TOKEN_KEY) || ''; }catch(e){ barberToken = ''; }
+
+  // ---------- enlace de autogestión del cliente (?apt=ID&token=XXXX) ----------
+  let selfManageId = null, selfManageToken = null, selfManageMode = false;
+  try{
+    const qp = new URLSearchParams(window.location.search);
+    selfManageId = qp.get('apt');
+    selfManageToken = qp.get('token');
+  }catch(e){}
 
   function refreshSetupWarning(){
     const w = document.getElementById('setupWarning');
@@ -719,7 +1109,7 @@
     pinInput.value = '';
     pinStatus.innerHTML = '';
     pinDesc.textContent = apiReady
-      ? 'Ingresa tu clave de Barbero para abrir la configuración técnica.'
+      ? 'Ingresa tu clave de peluquero para abrir la configuración técnica.'
       : 'Primera vez: ingresa el PIN predeterminado (' + DEFAULT_SETUP_PIN + ') para pegar la URL de tu Apps Script.';
     pinOverlay.classList.add('open');
     pinInput.focus();
@@ -743,13 +1133,13 @@
       return;
     }
 
-    // ya hay servidor conectado: misma validación real que el modo Barbero
+    // ya hay servidor conectado: misma validación real que el modo peluquero
     pinStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Verificando...</div>';
     try{
-      const ok = await checkSecretOnServer(typed);
-      if(ok){
-        barberSecret = typed;
-        try{ localStorage.setItem(SECRET_KEY, typed); }catch(e){}
+      const token = await loginOnServer(typed);
+      if(token){
+        barberToken = token;
+        try{ localStorage.setItem(TOKEN_KEY, token); }catch(e){}
         closePinModal();
         openSettings();
       }else{
@@ -804,6 +1194,7 @@
     settingsStatus.innerHTML = '<span style="color:var(--ok)">Guardado. Cargando datos...</span>';
     loadAll().then(()=>{
       settingsStatus.innerHTML = '<span style="color:var(--ok)">Conectado y sincronizado.</span>';
+      initChat();
       startPolling();
     });
   });
@@ -833,7 +1224,7 @@
     return res.json();
   }
   async function apiPost(action, payload){
-    const fullPayload = Object.assign({}, payload, { secret: barberSecret });
+    const fullPayload = Object.assign({}, payload, { token: barberToken });
     const res = await fetch(SHEETS_API_URL, {
       method:'POST',
       headers:{ 'Content-Type':'text/plain;charset=utf-8' }, // evita preflight CORS
@@ -841,20 +1232,29 @@
     });
     if(!res.ok) throw new Error('Error de red al guardar datos');
     const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Error desconocido');
+    if(!data.ok){
+      if(data.error && data.error.indexOf('Sesión') !== -1){
+        barberToken = '';
+        try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
+        showBarberLock();
+      }
+      throw new Error(data.error || 'Error desconocido');
+    }
     return data;
   }
 
   // Verifica una clave contra el servidor (misma validación para el candado de
-  // Barbero y para la configuración técnica). Devuelve true/false.
-  async function checkSecretOnServer(candidate){
+  // peluquero y para la configuración técnica). Si es correcta, devuelve un token de
+  // sesión firmado por el servidor (válido por unas horas); si no, devuelve null.
+  // La clave en sí nunca se guarda ni se reenvía en cada acción.
+  async function loginOnServer(candidate){
     const res = await fetch(SHEETS_API_URL, {
       method:'POST',
       headers:{ 'Content-Type':'text/plain;charset=utf-8' },
       body: JSON.stringify({ action:'checkSecret', payload:{ secret: candidate } })
     });
     const data = await res.json();
-    return !!data.ok;
+    return data.ok ? data.token : null;
   }
 
   async function loadAll(){
@@ -867,9 +1267,7 @@
       console.error(e);
     }
     renderShopHeader();
-    renderClientDaysHelper();
-    renderCutTypeOptions();
-    renderClientDateAvailability();
+    renderStaffOptions();
     renderBarberConfig();
     renderAppointmentsList();
     renderBlockedList();
@@ -883,6 +1281,8 @@
   function showBarberContent(){
     document.getElementById('barberLock').style.display = 'none';
     document.getElementById('barberContent').style.display = 'block';
+    loadStats();
+    loadWaitlistPanel();
   }
 
   async function tryUnlock(){
@@ -895,10 +1295,10 @@
     if(!attempt){ return; }
     msgEl.innerHTML = '<div class="msg"><span class="spinner"></span>Verificando...</div>';
     try{
-      const ok = await checkSecretOnServer(attempt);
-      if(ok){
-        barberSecret = attempt;
-        try{ localStorage.setItem(SECRET_KEY, attempt); }catch(e){}
+      const token = await loginOnServer(attempt);
+      if(token){
+        barberToken = token;
+        try{ localStorage.setItem(TOKEN_KEY, token); }catch(e){}
         showBarberContent();
       }else{
         msgEl.innerHTML = '<div class="msg err">Clave incorrecta.</div>';
@@ -913,14 +1313,12 @@
     if(e.key === 'Enter') tryUnlock();
   });
 
-  // si ya había una clave guardada en este navegador, probarla en silencio al cargar
-  async function autoUnlockIfPossible(){
-    if(!barberSecret || !apiReady) return;
-    try{
-      const ok = await checkSecretOnServer(barberSecret);
-      if(ok) showBarberContent();
-      else barberSecret = '';
-    }catch(e){}
+  // si ya había un token de sesión guardado en este navegador, mostrar directo (el
+  // servidor lo rechazará solo si expiró, y ahí volvemos a pedir la clave)
+  function autoUnlockIfPossible(){
+    if(!barberToken || !apiReady) return;
+    showBarberContent();
+    loadStats();
   }
 
   // ---------- tabs ----------
@@ -930,8 +1328,8 @@
       document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById('panel-'+tab.dataset.view).classList.add('active');
-      if(tab.dataset.view === 'Barbero'){
-        if(barberSecret){ autoUnlockIfPossible(); } else { showBarberLock(); }
+      if(tab.dataset.view === 'peluquero'){
+        if(barberToken){ autoUnlockIfPossible(); } else { showBarberLock(); }
       }
     });
   });
@@ -942,32 +1340,510 @@
     document.title = (config.barberName || 'Barbería') + ' · Turnos';
   }
 
-  function renderClientDaysHelper(){
+  function renderClientDaysHelper(){ /* chatbot maneja horarios en conversación */ }
+
+  function renderCutTypeOptions(){ /* chatbot muestra opciones como chips */ }
+
+  function renderStaffOptions(){
+    const staffList = (config.staff || []).filter(s=>s.name && s.name.trim());
+    if(staffList.length < 2){
+      selectedStaffId = (config.staff && config.staff[0]) ? config.staff[0].id : 'default';
+      return;
+    }
+    selectedStaffId = chatBooking.staffId || null;
+  }
+
+  // ---------- Chatbot conversacional (vista cliente) ----------
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput = document.getElementById('chatInput');
+  const chatSendBtn = document.getElementById('chatSendBtn');
+  const chatQuickReplies = document.getElementById('chatQuickReplies');
+
+  const chatBooking = { name:'', cut:'', email:'', date:'', time:'', staffId:null };
+  let chatMode = null; // 'book' | 'lookup'
+  let chatStep = 'idle';
+  let chatTyping = false;
+
+  function getDaysHelperText(){
     const names = config.days.slice().sort().map(d=>DIAS_LARGO[d]);
-    document.getElementById('daysHelper').textContent = names.length
-      ? 'Días de atención: ' + names.join(', ')
-      : 'El Barbero todavía no configuró sus días de atención.';
+    return names.length
+      ? 'Atendemos: ' + names.join(', ') + ', de ' + config.startHour + ':00 a ' + config.endHour + ':00.'
+      : 'Todavía no hay horarios configurados.';
   }
 
-  function renderCutTypeOptions(){
-    const select = document.getElementById('cutType');
-    const previous = select.value;
-    select.innerHTML = '<option value="">Elige una opción</option>';
-    (config.cutTypes || []).forEach(ct=>{
-      const opt = document.createElement('option');
-      opt.value = ct;
-      opt.textContent = ct;
-      select.appendChild(opt);
+  function scrollChatToBottom(){
+    requestAnimationFrame(()=>{ chatMessages.scrollTop = chatMessages.scrollHeight; });
+  }
+
+  function setChatInput(enabled, placeholder){
+    chatInput.disabled = !enabled;
+    chatSendBtn.disabled = !enabled || !chatInput.value.trim();
+    if(placeholder !== undefined) chatInput.placeholder = placeholder;
+  }
+
+  function clearQuickReplies(){ chatQuickReplies.innerHTML = ''; }
+
+  function addQuickReplies(items){
+    clearQuickReplies();
+    items.forEach(item=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'quick-chip' + (item.taken ? ' taken' : '');
+      btn.textContent = item.label;
+      if(!item.taken){
+        btn.addEventListener('click', ()=>{
+          if(chatTyping) return;
+          if(item.value !== undefined){
+            addUserMessage(item.label);
+            item.onPick(item.value);
+          }else if(item.onClick){
+            addUserMessage(item.label);
+            item.onClick();
+          }
+        });
+      }
+      chatQuickReplies.appendChild(btn);
     });
-    if((config.cutTypes || []).includes(previous)) select.value = previous;
   }
 
-  // ---------- client: date + slots ----------
-  const clientDateInput = document.getElementById('clientDate');
-  const today = new Date();
-  clientDateInput.min = today.toISOString().slice(0,10);
+  function addBotMessage(html, widgetHtml){
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML =
+      '<div class="msg-avatar" aria-hidden="true">✦</div>' +
+      '<div class="msg-bubble">' + html + (widgetHtml || '') + '</div>';
+    chatMessages.appendChild(row);
+    scrollChatToBottom();
+    return row;
+  }
 
-  clientDateInput.addEventListener('change', renderClientDateAvailability);
+  function addUserMessage(text){
+    const initial = text.trim().charAt(0).toUpperCase() || '?';
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML =
+      '<div class="msg-avatar" aria-hidden="true">' + escapeHtml(initial) + '</div>' +
+      '<div class="msg-bubble">' + escapeHtml(text) + '</div>';
+    chatMessages.appendChild(row);
+    scrollChatToBottom();
+  }
+
+  function showTypingThen(fn, delay){
+    chatTyping = true;
+    setChatInput(false);
+    clearQuickReplies();
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.id = 'chatTypingRow';
+    row.innerHTML =
+      '<div class="msg-avatar" aria-hidden="true">✦</div>' +
+      '<div class="msg-bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
+    chatMessages.appendChild(row);
+    scrollChatToBottom();
+    setTimeout(()=>{
+      const t = document.getElementById('chatTypingRow');
+      if(t) t.remove();
+      chatTyping = false;
+      fn();
+    }, delay || 500);
+  }
+
+  function resetChatBooking(){
+    chatBooking.name = '';
+    chatBooking.cut = '';
+    chatBooking.email = '';
+    chatBooking.date = '';
+    chatBooking.time = '';
+    chatBooking.staffId = null;
+    selectedTime = null;
+    selectedStaffId = (config.staff && config.staff[0]) ? config.staff[0].id : 'default';
+  }
+
+  function showWelcome(){
+    chatMode = null;
+    chatStep = 'welcome';
+    resetChatBooking();
+    clearQuickReplies();
+    setChatInput(true, 'Escribe tu mensaje...');
+    const shop = escapeHtml(config.barberName || 'la barbería');
+    addBotMessage(
+      '¡Hola! Soy el asistente de <strong>' + shop + '</strong>.<br><br>' +
+      'Puedo ayudarte a <strong>agendar un turno</strong>, <strong>buscar tus reservas</strong> o contarte nuestros horarios.<br><br>' +
+      '¿Qué te gustaría hacer?'
+    );
+    addQuickReplies([
+      { label:'📅 Agendar un turno', onClick: startBookingFlow },
+      { label:'🔍 Buscar mis turnos', onClick: startLookupFlow },
+      { label:'🕐 Ver horarios', onClick: showHoursInfo }
+    ]);
+  }
+
+  function startBookingFlow(){
+    if(!apiReady){
+      addBotMessage('⚠️ Todavía no está conectada la hoja de Google Sheets. El peluquero debe configurar la URL con el botón ⚙.');
+      showWelcome();
+      return;
+    }
+    chatMode = 'book';
+    chatStep = 'name';
+    resetChatBooking();
+    clearQuickReplies();
+    setChatInput(true, 'Escribe tu nombre completo...');
+    addBotMessage('¡Perfecto! Vamos a reservar tu turno.<br><br>¿Cuál es tu <strong>nombre completo</strong>?');
+  }
+
+  function startLookupFlow(){
+    if(!apiReady){
+      addBotMessage('⚠️ No hay conexión con la base de datos. Configurá la URL de Apps Script primero.');
+      showWelcome();
+      return;
+    }
+    chatMode = 'lookup';
+    chatStep = 'lookup_name';
+    clearQuickReplies();
+    setChatInput(true, 'Escribe tu nombre...');
+    addBotMessage('Claro, busquemos tus turnos.<br><br>¿A nombre de quién están registrados?');
+  }
+
+  function showHoursInfo(){
+    addBotMessage(getDaysHelperText() + '<br><br>Cada turno dura <strong>' + config.slotMin + ' minutos</strong>.');
+    addQuickReplies([
+      { label:'📅 Agendar turno', onClick: startBookingFlow },
+      { label:'↩ Volver al inicio', onClick: showWelcome }
+    ]);
+    setChatInput(false);
+    chatStep = 'welcome';
+  }
+
+  function askCutType(){
+    chatStep = 'cut';
+    const cuts = config.cutTypes || [];
+    if(cuts.length === 0){
+      addBotMessage('Todavía no hay servicios configurados. Contactá al peluquero.');
+      showWelcome();
+      return;
+    }
+    addBotMessage('Gracias, <strong>' + escapeHtml(chatBooking.name) + '</strong>.<br><br>¿Qué <strong>tipo de corte o servicio</strong> querés?');
+    addQuickReplies(cuts.map(ct=>({
+      label: ct.price ? (ct.name + ' — $' + ct.price) : ct.name,
+      value: ct.name,
+      onPick: (v)=>{ chatBooking.cut = v; afterCutSelected(); }
+    })));
+    setChatInput(false);
+  }
+
+  function needsStaffChoice(){
+    return (config.staff || []).filter(s=>s.name && s.name.trim()).length >= 2;
+  }
+
+  function afterCutSelected(){
+    if(needsStaffChoice()){
+      askStaff();
+    }else{
+      chatBooking.staffId = (config.staff && config.staff[0]) ? config.staff[0].id : 'default';
+      selectedStaffId = chatBooking.staffId;
+      askEmail();
+    }
+  }
+
+  function askStaff(){
+    chatStep = 'staff';
+    const staffList = (config.staff || []).filter(s=>s.name && s.name.trim());
+    addBotMessage('¿Con quién preferís atenderte?');
+    addQuickReplies(staffList.map(s=>({
+      label: s.name,
+      value: s.id,
+      onPick: (v)=>{
+        chatBooking.staffId = v;
+        selectedStaffId = v;
+        askEmail();
+      }
+    })));
+    setChatInput(false);
+  }
+
+  function askEmail(){
+    chatStep = 'email';
+    clearQuickReplies();
+    setChatInput(true, 'tu@correo.com');
+    addBotMessage('¿Cuál es tu <strong>correo electrónico</strong>?<br><span style="font-size:13px;color:#5b6672;">Te enviaremos la confirmación y la invitación al calendario.</span>');
+  }
+
+  function askDate(){
+    chatStep = 'date';
+    clearQuickReplies();
+    const todayStr = today.toISOString().slice(0,10);
+    const widgetId = 'chatDatePicker_' + Date.now();
+    addBotMessage(
+      '¿Para qué <strong>fecha</strong> querés el turno?<br><span style="font-size:13px;color:#5b6672;">' + getDaysHelperText() + '</span>',
+      '<div class="chat-widget"><input type="date" id="' + widgetId + '" min="' + todayStr + '"></div>'
+    );
+    setChatInput(false);
+    const picker = document.getElementById(widgetId);
+    picker.addEventListener('change', ()=>{
+      if(!picker.value) return;
+      addUserMessage(formatDate(picker.value));
+      handleDatePick(picker.value);
+    });
+  }
+
+  function handleDatePick(dateStr){
+    chatBooking.date = dateStr;
+    selectedTime = null;
+    chatBooking.time = '';
+
+    if(!config.days.includes(dateToWeekday(dateStr))){
+      addBotMessage('😔 Ese día no atendemos. Elegí otra fecha, por favor.');
+      askDate();
+      return;
+    }
+    if(config.blocked.includes(dateStr)){
+      addBotMessage('Ese día está <strong>bloqueado</strong> (feriado o día libre). Probá con otra fecha.');
+      askDate();
+      return;
+    }
+
+    const staffId = chatBooking.staffId || selectedStaffId || 'default';
+    const allSlots = generateSlotsForDate();
+    const takenTimes = appointments
+      .filter(a=>a.date===dateStr && (a.staffId||'default')===staffId)
+      .map(a=>a.time);
+
+    if(allSlots.length === 0){
+      addBotMessage('No hay horarios disponibles configurados. Contactá al peluquero.');
+      showWelcome();
+      return;
+    }
+
+    chatStep = 'time';
+    const freeSlots = allSlots.filter(t=>!takenTimes.includes(t));
+
+    if(freeSlots.length === 0){
+      addBotMessage(
+        'Ese día está <strong>completo</strong> 😔.<br><br>¿Querés anotarte en la lista de espera? Te avisamos por correo si se libera un horario.',
+        ''
+      );
+      addQuickReplies([
+        { label:'✅ Sí, anotarme en lista de espera', onClick: joinWaitlistFromChat },
+        { label:'📅 Elegir otra fecha', onClick: askDate },
+        { label:'↩ Volver al inicio', onClick: showWelcome }
+      ]);
+      return;
+    }
+
+    addBotMessage('Estos son los horarios disponibles para el <strong>' + formatDate(dateStr) + '</strong>:');
+    addQuickReplies(allSlots.map(t=>({
+      label: t,
+      value: t,
+      taken: takenTimes.includes(t),
+      onPick: (v)=>{ chatBooking.time = v; selectedTime = v; askConfirm(); }
+    })));
+  }
+
+  async function joinWaitlistFromChat(){
+    if(!chatBooking.name || !chatBooking.email){
+      addBotMessage('Necesito tu nombre y correo. Volvamos a empezar.');
+      startBookingFlow();
+      return;
+    }
+    addBotMessage('<span class="spinner"></span> Anotándote en la lista de espera...');
+    setChatInput(false);
+    clearQuickReplies();
+    try{
+      await apiPost('joinWaitlist', {
+        date: chatBooking.date,
+        client: chatBooking.name,
+        email: chatBooking.email,
+        cut: chatBooking.cut
+      });
+      addBotMessage('✅ ¡Listo! Te avisaremos por correo si se libera un horario el <strong>' + formatDate(chatBooking.date) + '</strong>.');
+      addQuickReplies([{ label:'↩ Volver al inicio', onClick: showWelcome }]);
+    }catch(e){
+      addBotMessage('No se pudo anotar: ' + escapeHtml(e.message));
+      addQuickReplies([{ label:'↩ Reintentar', onClick: showWelcome }]);
+    }
+  }
+
+  function askConfirm(){
+    chatStep = 'confirm';
+    clearQuickReplies();
+    setChatInput(false);
+    const cutInfo = (config.cutTypes||[]).find(c=>c.name===chatBooking.cut);
+    const priceTxt = cutInfo && cutInfo.price ? ' (aprox. $' + cutInfo.price + ')' : '';
+    const staffName = needsStaffChoice()
+      ? ((config.staff||[]).find(s=>s.id===chatBooking.staffId)||{}).name
+      : '';
+    addBotMessage(
+      'Resumen de tu turno:<br><br>' +
+      '👤 <strong>' + escapeHtml(chatBooking.name) + '</strong><br>' +
+      '✂️ <strong>' + escapeHtml(chatBooking.cut) + '</strong>' + priceTxt + '<br>' +
+      (staffName ? '🪑 Con <strong>' + escapeHtml(staffName) + '</strong><br>' : '') +
+      '📅 <strong>' + formatDate(chatBooking.date) + '</strong> a las <strong>' + chatBooking.time + '</strong><br>' +
+      '📧 ' + escapeHtml(chatBooking.email) + '<br><br>' +
+      '¿Confirmamos?'
+    );
+    addQuickReplies([
+      { label:'✅ Sí, confirmar turno', onClick: confirmBookingFromChat },
+      { label:'✏️ Cambiar horario', onClick: ()=>{ addUserMessage('Cambiar horario'); askDate(); } },
+      { label:'❌ Cancelar', onClick: showWelcome }
+    ]);
+  }
+
+  async function confirmBookingFromChat(){
+    chatStep = 'booking';
+    setChatInput(false);
+    clearQuickReplies();
+    addBotMessage('<span class="spinner"></span> Confirmando tu turno...');
+
+    const staffId = chatBooking.staffId || selectedStaffId || 'default';
+
+    try{
+      const fresh = await apiGet();
+      appointments = fresh.appointments || [];
+      const stillFree = !appointments.some(a=>
+        a.date===chatBooking.date && a.time===chatBooking.time && (a.staffId||'default')===staffId
+      );
+      if(!stillFree){
+        addBotMessage('😔 Ese horario acaba de reservarse. Elegí otro, por favor.');
+        handleDatePick(chatBooking.date);
+        return;
+      }
+
+      const result = await apiPost('addAppointment', {
+        date: chatBooking.date,
+        time: chatBooking.time,
+        client: chatBooking.name,
+        cut: chatBooking.cut,
+        email: chatBooking.email,
+        staffId
+      });
+      appointments.push(result.appointment);
+      const priceTxt = result.appointment.price ? (' · $' + result.appointment.price) : '';
+      addBotMessage(
+        '🎉 <strong>¡Turno confirmado!</strong><br><br>' +
+        escapeHtml(chatBooking.name) + ' — ' + formatDate(chatBooking.date) + ' a las ' + chatBooking.time +
+        ' (' + escapeHtml(chatBooking.cut) + priceTxt + ')<br>' +
+        'N.° <strong>' + result.appointment.id + '</strong><br><br>' +
+        'Te llegará un correo con la confirmación y el enlace para gestionar tu turno.'
+      );
+      renderAppointmentsList();
+      addQuickReplies([
+        { label:'📅 Agendar otro turno', onClick: startBookingFlow },
+        { label:'↩ Volver al inicio', onClick: showWelcome }
+      ]);
+      resetChatBooking();
+      chatStep = 'done';
+    }catch(e){
+      addBotMessage('No se pudo guardar el turno: ' + escapeHtml(e.message));
+      addQuickReplies([
+        { label:'🔄 Reintentar', onClick: askConfirm },
+        { label:'↩ Volver al inicio', onClick: showWelcome }
+      ]);
+    }
+  }
+
+  async function handleLookupName(name){
+    chatStep = 'lookup_results';
+    setChatInput(false);
+    clearQuickReplies();
+    addBotMessage('<span class="spinner"></span> Buscando turnos...');
+    try{
+      const fresh = await apiGet();
+      appointments = fresh.appointments || [];
+      const mine = appointments
+        .filter(a=>a.client.toLowerCase().includes(name.toLowerCase()))
+        .sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+
+      if(mine.length === 0){
+        addBotMessage('No encontré turnos a nombre de <strong>' + escapeHtml(name) + '</strong>.');
+      }else{
+        let html = 'Encontré <strong>' + mine.length + '</strong> turno(s) a tu nombre:<br><br>';
+        mine.forEach(a=>{
+          html += '<div class="chat-ticket">' +
+            '<strong>' + formatDate(a.date) + '</strong> · ' + a.time + '<br>' +
+            escapeHtml(a.cut || 'Sin especificar') +
+            (a.price ? ' · $' + a.price : '') +
+            '<br><span style="color:#5b6672;font-size:12px;">N.° ' + a.id + '</span></div>';
+        });
+        addBotMessage(html);
+      }
+      addQuickReplies([
+        { label:'🔍 Buscar otro nombre', onClick: startLookupFlow },
+        { label:'📅 Agendar turno', onClick: startBookingFlow },
+        { label:'↩ Volver al inicio', onClick: showWelcome }
+      ]);
+    }catch(e){
+      addBotMessage('No se pudo consultar la información. Probá de nuevo más tarde.');
+      addQuickReplies([{ label:'↩ Volver al inicio', onClick: showWelcome }]);
+    }
+  }
+
+  function handleChatSubmit(){
+    if(chatTyping) return;
+    const text = chatInput.value.trim();
+    if(!text) return;
+    chatInput.value = '';
+    chatSendBtn.disabled = true;
+    addUserMessage(text);
+
+    if(chatStep === 'name'){
+      if(text.length < 2){
+        showTypingThen(()=> addBotMessage('Por favor escribí tu nombre completo (mínimo 2 caracteres).'));
+        return;
+      }
+      chatBooking.name = text;
+      showTypingThen(askCutType);
+      return;
+    }
+    if(chatStep === 'email'){
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)){
+        showTypingThen(()=> addBotMessage('Ese correo no parece válido. Probá de nuevo, por ejemplo: <strong>juan@correo.com</strong>'));
+        return;
+      }
+      chatBooking.email = text;
+      showTypingThen(askDate);
+      return;
+    }
+    if(chatStep === 'lookup_name'){
+      showTypingThen(()=> handleLookupName(text));
+      return;
+    }
+    if(chatStep === 'welcome' || chatStep === 'idle'){
+      const lower = text.toLowerCase();
+      if(/agendar|reserv|turno|cita/.test(lower)){
+        showTypingThen(startBookingFlow);
+      }else if(/buscar|mis turnos|consultar/.test(lower)){
+        showTypingThen(startLookupFlow);
+      }else if(/horario|hora|cuando|días|dias/.test(lower)){
+        showTypingThen(showHoursInfo);
+      }else{
+        showTypingThen(()=>{
+          addBotMessage('No estoy seguro de entender. Podés elegir una opción:');
+          addQuickReplies([
+            { label:'📅 Agendar un turno', onClick: startBookingFlow },
+            { label:'🔍 Buscar mis turnos', onClick: startLookupFlow },
+            { label:'🕐 Ver horarios', onClick: showHoursInfo }
+          ]);
+        });
+      }
+    }
+  }
+
+  function initChat(){
+    chatMessages.innerHTML = '';
+    showWelcome();
+  }
+
+  chatInput.addEventListener('input', ()=>{
+    chatSendBtn.disabled = chatInput.disabled || !chatInput.value.trim();
+  });
+  chatSendBtn.addEventListener('click', handleChatSubmit);
+  chatInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter') handleChatSubmit();
+  });
+
+  // ---------- utilidades de fecha y horarios ----------
+  const today = new Date();
 
   function dateToWeekday(dateStr){
     const [y,m,d] = dateStr.split('-').map(Number);
@@ -987,164 +1863,13 @@
     return slots;
   }
 
-  function renderClientDateAvailability(){
-    const dateStr = clientDateInput.value;
-    const msgEl = document.getElementById('clientDateMsg');
-    const wrap = document.getElementById('slotsWrap');
-    const grid = document.getElementById('slotsGrid');
-    msgEl.innerHTML = '';
-    wrap.style.display = 'none';
-    selectedTime = null;
-    updateBookBtn();
-
-    if(!dateStr) return;
-
-    if(!config.days.includes(dateToWeekday(dateStr))){
-      msgEl.innerHTML = '<div class="msg warn">El Barbero no atiende ese día. Elige otra fecha.</div>';
-      return;
-    }
-    if(config.blocked.includes(dateStr)){
-      msgEl.innerHTML = '<div class="msg warn">Ese día está bloqueado (feriado o día libre). Elige otra fecha.</div>';
-      return;
-    }
-
-    const allSlots = generateSlotsForDate();
-    const takenTimes = appointments.filter(a=>a.date===dateStr).map(a=>a.time);
-
-    if(allSlots.length === 0){
-      msgEl.innerHTML = '<div class="msg warn">El Barbero todavía no configuró un horario válido.</div>';
-      return;
-    }
-
-    grid.innerHTML = '';
-    allSlots.forEach(t=>{
-      const div = document.createElement('div');
-      const taken = takenTimes.includes(t);
-      div.className = 'slot' + (taken ? ' taken' : '');
-      div.textContent = t;
-      if(!taken){
-        div.addEventListener('click', ()=>{
-          document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
-          div.classList.add('selected');
-          selectedTime = t;
-          updateBookBtn();
-        });
-      }
-      grid.appendChild(div);
-    });
-
-    wrap.style.display = 'block';
-  }
-
-  function updateBookBtn(){
-    const name = document.getElementById('clientName').value.trim();
-    const cut = document.getElementById('cutType').value;
-    const email = document.getElementById('clientEmail').value.trim();
-    const dateStr = clientDateInput.value;
-    document.getElementById('bookBtn').disabled = !(name && cut && email && dateStr && selectedTime && apiReady);
-  }
-  document.getElementById('clientName').addEventListener('input', updateBookBtn);
-  document.getElementById('cutType').addEventListener('change', updateBookBtn);
-  document.getElementById('clientEmail').addEventListener('input', updateBookBtn);
-
-  // ---------- client: modal de confirmación previo a agendar ----------
-  const confirmBookOverlay = document.getElementById('confirmBookOverlay');
-  const confirmBookStatus = document.getElementById('confirmBookStatus');
-
-  function openConfirmBookModal(){
-    const name = document.getElementById('clientName').value.trim();
-    const cut = document.getElementById('cutType').value;
-    const dateStr = clientDateInput.value;
-    confirmBookStatus.innerHTML = '';
-    document.getElementById('confirmBookDesc').innerHTML =
-      name + ', vas a agendar tu turno para <strong>' + formatDate(dateStr) + '</strong> a las ' +
-      '<strong>' + selectedTime + '</strong>, servicio <strong>' + cut + '</strong>. ¿Desea confirmar?';
-    document.getElementById('confirmBookYesBtn').disabled = false;
-    confirmBookOverlay.classList.add('open');
-  }
-  function closeConfirmBookModal(){ confirmBookOverlay.classList.remove('open'); }
-
-  document.getElementById('closeConfirmBookBtn').addEventListener('click', closeConfirmBookModal);
-  document.getElementById('confirmBookNoBtn').addEventListener('click', closeConfirmBookModal);
-  confirmBookOverlay.addEventListener('click', (e)=>{ if(e.target === confirmBookOverlay) closeConfirmBookModal(); });
-
-  document.getElementById('bookBtn').addEventListener('click', ()=>{
-    const name = document.getElementById('clientName').value.trim();
-    const cut = document.getElementById('cutType').value;
-    const dateStr = clientDateInput.value;
-    if(!name || !cut || !dateStr || !selectedTime) return;
-    openConfirmBookModal();
-  });
-
-  document.getElementById('confirmBookYesBtn').addEventListener('click', async ()=>{
-    const name = document.getElementById('clientName').value.trim();
-    const cut = document.getElementById('cutType').value;
-    const email = document.getElementById('clientEmail').value.trim();
-    const dateStr = clientDateInput.value;
-    const bookMsg = document.getElementById('bookMsg');
-    if(!name || !cut || !dateStr || !selectedTime) return;
-
-    const yesBtn = document.getElementById('confirmBookYesBtn');
-    yesBtn.disabled = true;
-    confirmBookStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Confirmando turno...</div>';
-
-    const btn = document.getElementById('bookBtn');
-    btn.disabled = true;
-
-    try{
-      // re-chequeo por si alguien reservó ese horario mientras tanto
-      const fresh = await apiGet();
-      appointments = fresh.appointments || [];
-      const stillFree = !appointments.some(a=>a.date===dateStr && a.time===selectedTime);
-      if(!stillFree){
-        closeConfirmBookModal();
-        bookMsg.innerHTML = '<div class="msg err">Ese horario acaba de reservarse. Elige otro.</div>';
-        renderClientDateAvailability();
-        return;
-      }
-
-      const result = await apiPost('addAppointment', { date: dateStr, time: selectedTime, client: name, cut, email });
-      appointments.push(result.appointment);
-      closeConfirmBookModal();
-      bookMsg.innerHTML = '<div class="msg ok">¡Turno confirmado! ' + name + ' — ' + formatDate(dateStr) + ' a las ' + selectedTime + ' (' + cut + '). N.° ' + result.appointment.id + '</div>';
-      document.getElementById('clientName').value = '';
-      document.getElementById('cutType').value = '';
-      document.getElementById('clientEmail').value = '';
-      selectedTime = null;
-      renderClientDateAvailability();
-      renderAppointmentsList();
-    }catch(e){
-      confirmBookStatus.innerHTML = '<div class="msg err">No se pudo guardar el turno. ' + e.message + '</div>';
-    }finally{
-      updateBookBtn();
-    }
-  });
+  function renderClientDateAvailability(){ /* chatbot gestiona disponibilidad en conversación */ }
 
   function formatDate(dateStr){
     const [y,m,d] = dateStr.split('-').map(Number);
     const dt = new Date(y, m-1, d);
     return DIAS_LARGO[dt.getDay()] + ' ' + d + '/' + m + '/' + y;
   }
-
-  // ---------- client: lookup ----------
-  document.getElementById('lookupBtn').addEventListener('click', async ()=>{
-    const results = document.getElementById('lookupResults');
-    const name = document.getElementById('lookupName').value.trim().toLowerCase();
-    if(!name){ results.innerHTML = ''; return; }
-    results.innerHTML = '<div class="msg"><span class="spinner"></span>Buscando...</div>';
-    try{
-      const fresh = await apiGet();
-      appointments = fresh.appointments || [];
-      const mine = appointments
-        .filter(a=>a.client.toLowerCase().includes(name))
-        .sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
-      results.innerHTML = mine.length===0
-        ? '<div class="empty">No encontramos turnos con ese nombre.</div>'
-        : mine.map(a => ticketHtml(a, false)).join('');
-    }catch(e){
-      results.innerHTML = '<div class="msg err">No se pudo consultar la información.</div>';
-    }
-  });
 
   // ---------- barber: days config ----------
   const daysGrid = document.getElementById('daysGrid');
@@ -1164,19 +1889,23 @@
     document.getElementById('startHour').value = config.startHour;
     document.getElementById('endHour').value = config.endHour;
     document.getElementById('slotMin').value = String(config.slotMin);
+    document.getElementById('reminderHoursBefore').value = config.reminderHoursBefore || 24;
+    document.getElementById('maxBookingsPerEmailPerDay').value = config.maxBookingsPerEmailPerDay || 3;
     document.querySelectorAll('.day-chip').forEach(chip=>{
       const d = Number(chip.dataset.day);
       chip.classList.toggle('on', config.days.includes(d));
     });
-    workingCutTypes = (config.cutTypes || []).slice();
+    workingCutTypes = (config.cutTypes || []).map(ct=>({name:ct.name, price:ct.price||0}));
     renderCutTypesList();
+    workingStaff = (config.staff || []).map(s=>({id:s.id, name:s.name||'', calendarId:s.calendarId||''}));
+    renderStaffList();
   }
 
   function renderCutTypesList(){
     const list = document.getElementById('cutTypesList');
     if(workingCutTypes.length===0){ list.innerHTML = '<div class="helper">Todavía no agregaste ningún tipo de corte.</div>'; return; }
     list.innerHTML = workingCutTypes
-      .map((ct, i) => `<span class="blocked-chip">${escapeHtml(ct)} <button data-idx="${i}" aria-label="Quitar">✕</button></span>`)
+      .map((ct, i) => `<span class="blocked-chip">${escapeHtml(ct.name)}${ct.price ? ' — $'+ct.price : ''} <button data-idx="${i}" aria-label="Quitar">✕</button></span>`)
       .join('');
     list.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -1188,14 +1917,45 @@
 
   document.getElementById('addCutTypeBtn').addEventListener('click', ()=>{
     const input = document.getElementById('cutTypeInput');
+    const priceInput = document.getElementById('cutTypePriceInput');
     const value = input.value.trim();
+    const price = Number(priceInput.value) || 0;
     if(!value) return;
-    if(!workingCutTypes.includes(value)) workingCutTypes.push(value);
+    if(!workingCutTypes.some(ct=>ct.name===value)) workingCutTypes.push({name:value, price});
     input.value = '';
+    priceInput.value = '';
     renderCutTypesList();
   });
   document.getElementById('cutTypeInput').addEventListener('keydown', (e)=>{
     if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('addCutTypeBtn').click(); }
+  });
+
+  // ---------- barber: peluqueros / sillas ----------
+  function renderStaffList(){
+    const list = document.getElementById('staffList');
+    if(workingStaff.length===0){ list.innerHTML = '<div class="helper">Un solo peluquero (vos). Agregá nombres solo si trabajan varios.</div>'; return; }
+    list.innerHTML = workingStaff
+      .map((s, i) => `<span class="blocked-chip">${escapeHtml(s.name || '(sin nombre)')} <button data-idx="${i}" aria-label="Quitar">✕</button></span>`)
+      .join('');
+    list.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(workingStaff.length<=1) return; // siempre debe quedar al menos uno
+        workingStaff.splice(Number(btn.dataset.idx), 1);
+        renderStaffList();
+      });
+    });
+  }
+
+  document.getElementById('addStaffBtn').addEventListener('click', ()=>{
+    const nameInput = document.getElementById('staffNameInput');
+    const calInput = document.getElementById('staffCalendarInput');
+    const name = nameInput.value.trim();
+    if(!name) return;
+    const id = 'staff-' + Date.now().toString(36);
+    workingStaff.push({ id, name, calendarId: calInput.value.trim() });
+    nameInput.value = '';
+    calInput.value = '';
+    renderStaffList();
   });
 
   document.getElementById('saveConfigBtn').addEventListener('click', async ()=>{
@@ -1219,16 +1979,19 @@
       return;
     }
 
-    const newConfig = { barberName:name, startHour:start, endHour:end, slotMin, days, cutTypes: workingCutTypes.slice(), blocked: config.blocked };
+    const reminderHoursBefore = Number(document.getElementById('reminderHoursBefore').value) || 24;
+    const maxBookingsPerEmailPerDay = Number(document.getElementById('maxBookingsPerEmailPerDay').value) || 3;
+    const staff = workingStaff.length > 0 ? workingStaff.slice() : [{id:'default', name:'', calendarId:''}];
+
+    const newConfig = { barberName:name, startHour:start, endHour:end, slotMin, days, cutTypes: workingCutTypes.slice(), staff, reminderHoursBefore, maxBookingsPerEmailPerDay, blocked: config.blocked };
     msgEl.innerHTML = '<div class="msg"><span class="spinner"></span>Guardando...</div>';
     try{
       await apiPost('saveConfig', newConfig);
       config = newConfig;
       msgEl.innerHTML = '<div class="msg ok">Configuración guardada en la Hoja de cálculo.</div>';
       renderShopHeader();
-      renderClientDaysHelper();
-      renderCutTypeOptions();
-      renderClientDateAvailability();
+      renderStaffOptions();
+      if(document.getElementById('panel-cliente').classList.contains('active')) initChat();
     }catch(e){
       msgEl.innerHTML = '<div class="msg err">No se pudo guardar. ' + e.message + '</div>';
     }
@@ -1273,7 +2036,7 @@
         <div class="ticket-main">
           <div class="ticket-name">${escapeHtml(a.client)}</div>
           <div class="ticket-date">${formatDate(a.date)} · ${a.time} · ${a.id}</div>
-          <span class="ticket-cut-tag">${escapeHtml(a.cut || 'Sin especificar')}</span>
+          <span class="ticket-cut-tag">${escapeHtml(a.cut || 'Sin especificar')}${a.price ? ' · $'+a.price : ''}</span>
           ${withCancel ? `<div class="ticket-actions"><button class="btn secondary small" data-reschedule="${a.id}">Reprogramar</button> <button class="btn secondary small" data-cancel="${a.id}">Cancelar turno</button></div>` : ''}
         </div>
         <div class="ticket-stub">
@@ -1353,6 +2116,7 @@
   function closeRescheduleModal(){
     rescheduleOverlay.classList.remove('open');
     rescheduleTarget = null;
+    selfManageMode = false;
   }
 
   function renderRescheduleSlots(){
@@ -1363,7 +2127,7 @@
     if(!dateStr || !rescheduleTarget) return;
 
     if(!config.days.includes(dateToWeekday(dateStr))){
-      rescheduleStatus.innerHTML = '<div class="msg warn">El Barbero no atiende ese día.</div>';
+      rescheduleStatus.innerHTML = '<div class="msg warn">El peluquero no atiende ese día.</div>';
       return;
     }
     if(config.blocked.includes(dateStr)){
@@ -1402,13 +2166,19 @@
     const dateStr = rescheduleDateInput.value;
     rescheduleStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Reprogramando...</div>';
     try{
-      await apiPost('rescheduleAppointment', { id: rescheduleTarget.id, date: dateStr, time: rescheduleSelectedTime });
-      appointments = appointments.map(a => a.id === rescheduleTarget.id
-        ? Object.assign({}, a, { date: dateStr, time: rescheduleSelectedTime })
-        : a);
-      renderAppointmentsList();
-      renderClientDateAvailability();
-      closeRescheduleModal();
+      if(selfManageMode){
+        await apiPost('clientRescheduleAppointment', { id: rescheduleTarget.id, manageToken: selfManageToken, date: dateStr, time: rescheduleSelectedTime });
+        closeRescheduleModal();
+        initSelfManage();
+      }else{
+        await apiPost('rescheduleAppointment', { id: rescheduleTarget.id, date: dateStr, time: rescheduleSelectedTime });
+        appointments = appointments.map(a => a.id === rescheduleTarget.id
+          ? Object.assign({}, a, { date: dateStr, time: rescheduleSelectedTime })
+          : a);
+        renderAppointmentsList();
+        renderClientDateAvailability();
+        closeRescheduleModal();
+      }
     }catch(e){
       rescheduleStatus.innerHTML = '<div class="msg err">No se pudo reprogramar. ' + e.message + '</div>';
     }
@@ -1433,10 +2203,126 @@
     refreshTimer = setInterval(loadAll, 8000);
   }
   document.addEventListener('visibilitychange', ()=>{
-    if(!document.hidden) loadAll();
+    if(!document.hidden && !selfManageMode) loadAll();
   });
 
-  loadAll().then(startPolling);
+  // ---------- estadísticas (barbero) ----------
+  async function loadStats(){
+    const box = document.getElementById('statsBox');
+    if(!barberToken || !apiReady) return;
+    try{
+      const data = await apiPost('getStats', {});
+      const s = data.stats;
+      box.innerHTML = `
+        <div class="row" style="flex-wrap:wrap;">
+          <div class="field"><strong>${s.totalUpcoming}</strong><div class="helper">Turnos por venir</div></div>
+          <div class="field"><strong>${s.totalThisWeek}</strong><div class="helper">En los próximos 7 días</div></div>
+          <div class="field"><strong>${s.topCut ? escapeHtml(s.topCut) : '—'}</strong><div class="helper">Corte más pedido${s.topCutCount ? ' ('+s.topCutCount+')' : ''}</div></div>
+          <div class="field"><strong>${s.cancellationRate}%</strong><div class="helper">Tasa de cancelación (${s.totalCancelled}/${s.totalBooked})</div></div>
+          <div class="field"><strong>$${s.totalRevenueUpcoming}</strong><div class="helper">Ingreso estimado (turnos por venir)</div></div>
+        </div>`;
+    }catch(e){
+      box.innerHTML = '<div class="msg err">No se pudieron cargar las estadísticas.</div>';
+    }
+  }
+
+  // ---------- lista de espera (barbero) ----------
+  async function loadWaitlistPanel(){
+    const el = document.getElementById('waitlistPanel');
+    if(!barberToken || !apiReady) return;
+    el.innerHTML = '<div class="msg"><span class="spinner"></span>Cargando...</div>';
+    try{
+      const data = await apiPost('listWaitlist', {});
+      const list = data.waitlist || [];
+      el.innerHTML = list.length===0
+        ? '<div class="empty">Nadie anotado en este momento.</div>'
+        : list.map(w => `<span class="blocked-chip">${formatDate(w.date)} · ${escapeHtml(w.client)}${w.cut ? ' · '+escapeHtml(w.cut) : ''}</span>`).join('');
+    }catch(e){
+      el.innerHTML = '<div class="msg err">No se pudo cargar la lista de espera.</div>';
+    }
+  }
+
+  // ---------- exportar CSV ----------
+  document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+    const nameFilter = document.getElementById('filterName').value.trim().toLowerCase();
+    const dateFilter = document.getElementById('filterDate').value;
+    let rows = appointments
+      .filter(a => a.date >= today.toISOString().slice(0,10))
+      .filter(a => !nameFilter || a.client.toLowerCase().includes(nameFilter))
+      .filter(a => !dateFilter || a.date === dateFilter)
+      .sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+    const header = ['id','fecha','hora','cliente','corte','precio'];
+    const csvLines = [header.join(',')].concat(rows.map(a=>{
+      const cells = [a.id, a.date, a.time, a.client, a.cut||'', a.price||''];
+      return cells.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',');
+    }));
+    const blob = new Blob([csvLines.join('\n')], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'turnos-' + (dateFilter || 'todos') + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // ---------- autogestión del cliente vía enlace del email ----------
+  async function initSelfManage(){
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('selfManagePanel').style.display = 'block';
+    const content = document.getElementById('selfManageContent');
+    content.innerHTML = '<div class="msg"><span class="spinner"></span>Cargando tu turno...</div>';
+    if(!apiReady){
+      content.innerHTML = '<div class="msg err">Este enlace no puede cargarse: falta configurar la conexión con la Hoja de cálculo.</div>';
+      return;
+    }
+    try{
+      const res = await fetch(SHEETS_API_URL + '?action=getAppointment&id=' + encodeURIComponent(selfManageId) + '&token=' + encodeURIComponent(selfManageToken));
+      const data = await res.json();
+      if(!data.ok){
+        content.innerHTML = '<div class="msg err">' + (data.error || 'Turno no encontrado.') + '</div>';
+        return;
+      }
+      const apt = data.appointment;
+      content.innerHTML = `
+        <h2>${escapeHtml(apt.client)}</h2>
+        <p>${formatDate(apt.date)} a las ${apt.time} — ${escapeHtml(apt.cut||'Sin especificar')}${apt.price ? ' · $'+apt.price : ''}</p>
+        <p class="helper">N.º de turno: ${apt.id}</p>
+        <div class="modal-actions">
+          <button class="btn secondary" id="selfRescheduleBtn">Reprogramar</button>
+          <button class="btn" id="selfCancelBtn">Cancelar mi turno</button>
+        </div>
+        <div id="selfManageStatus"></div>`;
+      document.getElementById('selfCancelBtn').addEventListener('click', async ()=>{
+        if(!window.confirm('¿Seguro que querés cancelar tu turno?')) return;
+        const statusEl = document.getElementById('selfManageStatus');
+        statusEl.innerHTML = '<div class="msg"><span class="spinner"></span>Cancelando...</div>';
+        try{
+          await apiPost('clientCancelAppointment', { id: apt.id, manageToken: selfManageToken });
+          statusEl.innerHTML = '<div class="msg ok">Tu turno fue cancelado.</div>';
+          content.querySelector('.modal-actions').style.display = 'none';
+        }catch(e){
+          statusEl.innerHTML = '<div class="msg err">' + e.message + '</div>';
+        }
+      });
+      document.getElementById('selfRescheduleBtn').addEventListener('click', ()=>{
+        selfManageMode = true;
+        openRescheduleModal(apt);
+      });
+    }catch(e){
+      content.innerHTML = '<div class="msg err">No se pudo cargar tu turno.</div>';
+    }
+  }
+
+  if(selfManageId && selfManageToken){
+    loadAll().then(initSelfManage);
+  }else{
+    loadAll().then(()=>{
+      initChat();
+      startPolling();
+    });
+  }
 })();
 </script>
 </body>
