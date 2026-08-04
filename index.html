@@ -629,7 +629,7 @@
     cursor:not-allowed;
     pointer-events:none;
   }
-  .chat-input-row{
+  .chat-text-widget{
     display:flex;
     gap:10px;
     align-items:center;
@@ -638,13 +638,15 @@
     border-radius:28px;
     padding:6px 6px 6px 18px;
     transition:border-color .15s ease;
+    max-width:320px;
   }
-  .chat-input-row:focus-within{
+  .chat-text-widget:focus-within{
     border-color:#4285f4;
     box-shadow:0 0 0 3px rgba(66,133,244,0.12);
   }
-  .chat-input-row input{
+  .chat-text-widget input{
     flex:1;
+    min-width:0;
     border:none;
     background:transparent;
     font-family:'Work Sans', sans-serif;
@@ -653,7 +655,8 @@
     outline:none;
     padding:8px 0;
   }
-  .chat-input-row input::placeholder{ color:#8a9199; }
+  .chat-text-widget input::placeholder{ color:#8a9199; }
+  .chat-text-widget input:disabled{ opacity:.6; }
   .chat-send-btn{
     width:42px;
     height:42px;
@@ -671,6 +674,23 @@
   .chat-send-btn:hover{ transform:scale(1.05); }
   .chat-send-btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
   .chat-send-btn svg{ width:18px; height:18px; }
+  .chat-widget-send{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:none;
+    background:linear-gradient(135deg, #4285f4, #7b61c7);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .chat-widget-send:hover{ transform:scale(1.05); }
+  .chat-widget-send:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+  .chat-widget-send svg{ width:16px; height:16px; }
   .chat-widget{
     margin-top:10px;
     display:flex;
@@ -779,12 +799,6 @@
         <div class="chat-messages" id="chatMessages" role="log" aria-live="polite"></div>
         <div class="chat-input-area">
           <div class="chat-quick-replies" id="chatQuickReplies"></div>
-          <div class="chat-input-row">
-            <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." autocomplete="off" maxlength="120">
-            <button class="chat-send-btn" id="chatSendBtn" aria-label="Enviar" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
-          </div>
         </div>
       </div>
     </section>
@@ -1355,11 +1369,9 @@
 
   // ---------- Chatbot conversacional (vista cliente) ----------
   const chatMessages = document.getElementById('chatMessages');
-  const chatInput = document.getElementById('chatInput');
-  const chatSendBtn = document.getElementById('chatSendBtn');
   const chatQuickReplies = document.getElementById('chatQuickReplies');
 
-  const chatBooking = { name:'', cut:'', email:'', date:'', time:'', staffId:null };
+  const chatBooking = { name:'', phone:'', cut:'', email:'', date:'', time:'', staffId:null };
   let chatMode = null; // 'book' | 'lookup'
   let chatStep = 'idle';
   let chatTyping = false;
@@ -1375,13 +1387,47 @@
     requestAnimationFrame(()=>{ chatMessages.scrollTop = chatMessages.scrollHeight; });
   }
 
-  function setChatInput(enabled, placeholder){
-    chatInput.disabled = !enabled;
-    chatSendBtn.disabled = !enabled || !chatInput.value.trim();
-    if(placeholder !== undefined) chatInput.placeholder = placeholder;
+  function clearQuickReplies(){ chatQuickReplies.innerHTML = ''; }
+
+  // Genera un campo de texto + botón "enviar" embebido DENTRO de la burbuja del bot,
+  // para que el cliente nunca necesite la barra inferior: todo pasa por burbujas.
+  function chatTextWidget(placeholder, inputType){
+    const id = 'ctw_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    const html =
+      '<div class="chat-widget"><div class="chat-text-widget">' +
+        '<input type="' + (inputType||'text') + '" id="' + id + '" placeholder="' + escapeHtml(placeholder) + '" autocomplete="off" maxlength="120">' +
+        '<button type="button" class="chat-widget-send" id="' + id + '_btn" aria-label="Enviar" disabled>' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>' +
+        '</button>' +
+      '</div></div>';
+    return { id, html };
   }
 
-  function clearQuickReplies(){ chatQuickReplies.innerHTML = ''; }
+  // Conecta el widget de texto: onSubmit(valor, retry) — llamar retry() re-habilita
+  // el mismo campo para que el cliente pueda corregir sin perder la burbuja.
+  function wireTextWidget(widget, onSubmit){
+    const input = document.getElementById(widget.id);
+    const btn = document.getElementById(widget.id + '_btn');
+    if(!input || !btn) return;
+    function submit(){
+      if(chatTyping || input.disabled) return;
+      const val = input.value.trim();
+      if(!val) return;
+      addUserMessage(val);
+      input.value = '';
+      input.disabled = true;
+      btn.disabled = true;
+      onSubmit(val, ()=>{
+        input.disabled = false;
+        btn.disabled = false;
+        input.focus();
+      });
+    }
+    input.addEventListener('input', ()=>{ btn.disabled = !input.value.trim(); });
+    input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') submit(); });
+    btn.addEventListener('click', submit);
+    setTimeout(()=>input.focus(), 300);
+  }
 
   function addQuickReplies(items){
     clearQuickReplies();
@@ -1430,7 +1476,6 @@
 
   function showTypingThen(fn, delay){
     chatTyping = true;
-    setChatInput(false);
     clearQuickReplies();
     const row = document.createElement('div');
     row.className = 'msg-row bot';
@@ -1450,6 +1495,7 @@
 
   function resetChatBooking(){
     chatBooking.name = '';
+    chatBooking.phone = '';
     chatBooking.cut = '';
     chatBooking.email = '';
     chatBooking.date = '';
@@ -1464,7 +1510,6 @@
     chatStep = 'welcome';
     resetChatBooking();
     clearQuickReplies();
-    setChatInput(true, 'Escribe tu mensaje...');
     const shop = escapeHtml(config.barberName || 'la barbería');
     addBotMessage(
       '¡Hola! Soy el asistente de <strong>' + shop + '</strong>.<br><br>' +
@@ -1488,8 +1533,16 @@
     chatStep = 'name';
     resetChatBooking();
     clearQuickReplies();
-    setChatInput(true, 'Escribe tu nombre completo...');
-    addBotMessage('¡Perfecto! Vamos a reservar tu turno.<br><br>¿Cuál es tu <strong>nombre completo</strong>?');
+    const w = chatTextWidget('Tu nombre completo...');
+    addBotMessage('¡Perfecto! Vamos a reservar tu turno.<br><br>¿Cuál es tu <strong>nombre completo</strong>?', w.html);
+    wireTextWidget(w, (text, retry)=>{
+      if(text.length < 2){
+        showTypingThen(()=>{ addBotMessage('Por favor escribí tu nombre completo (mínimo 2 caracteres).'); retry(); });
+        return;
+      }
+      chatBooking.name = text;
+      showTypingThen(askPhone);
+    });
   }
 
   function startLookupFlow(){
@@ -1501,8 +1554,11 @@
     chatMode = 'lookup';
     chatStep = 'lookup_name';
     clearQuickReplies();
-    setChatInput(true, 'Escribe tu nombre...');
-    addBotMessage('Claro, busquemos tus turnos.<br><br>¿A nombre de quién están registrados?');
+    const w = chatTextWidget('Tu nombre...');
+    addBotMessage('Claro, busquemos tus turnos.<br><br>¿A nombre de quién están registrados?', w.html);
+    wireTextWidget(w, (text)=>{
+      showTypingThen(()=> handleLookupName(text));
+    });
   }
 
   function showHoursInfo(){
@@ -1511,8 +1567,23 @@
       { label:'📅 Agendar turno', onClick: startBookingFlow },
       { label:'↩ Volver al inicio', onClick: showWelcome }
     ]);
-    setChatInput(false);
     chatStep = 'welcome';
+  }
+
+  function askPhone(){
+    chatStep = 'phone';
+    clearQuickReplies();
+    const w = chatTextWidget('Ej: 3001234567', 'tel');
+    addBotMessage('Gracias, <strong>' + escapeHtml(chatBooking.name) + '</strong>.<br><br>¿Cuál es tu <strong>número de teléfono</strong>?<br><span style="font-size:13px;color:#5b6672;">Por si necesitamos contactarte por tu turno.</span>', w.html);
+    wireTextWidget(w, (text, retry)=>{
+      const digits = text.replace(/\D/g, '');
+      if(digits.length < 7 || digits.length > 15){
+        showTypingThen(()=>{ addBotMessage('Ese teléfono no parece válido. Escribilo con código de área, por ejemplo: <strong>3001234567</strong>'); retry(); });
+        return;
+      }
+      chatBooking.phone = text.trim();
+      showTypingThen(askCutType);
+    });
   }
 
   function askCutType(){
@@ -1523,13 +1594,12 @@
       showWelcome();
       return;
     }
-    addBotMessage('Gracias, <strong>' + escapeHtml(chatBooking.name) + '</strong>.<br><br>¿Qué <strong>tipo de corte o servicio</strong> querés?');
+    addBotMessage('¿Qué <strong>tipo de corte o servicio</strong> querés?');
     addQuickReplies(cuts.map(ct=>({
       label: ct.price ? (ct.name + ' — $' + ct.price) : ct.name,
       value: ct.name,
       onPick: (v)=>{ chatBooking.cut = v; afterCutSelected(); }
     })));
-    setChatInput(false);
   }
 
   function needsStaffChoice(){
@@ -1542,7 +1612,7 @@
     }else{
       chatBooking.staffId = (config.staff && config.staff[0]) ? config.staff[0].id : 'default';
       selectedStaffId = chatBooking.staffId;
-      askEmail();
+      askDate();
     }
   }
 
@@ -1556,17 +1626,24 @@
       onPick: (v)=>{
         chatBooking.staffId = v;
         selectedStaffId = v;
-        askEmail();
+        askDate();
       }
     })));
-    setChatInput(false);
   }
 
   function askEmail(){
     chatStep = 'email';
     clearQuickReplies();
-    setChatInput(true, 'tu@correo.com');
-    addBotMessage('¿Cuál es tu <strong>correo electrónico</strong>?<br><span style="font-size:13px;color:#5b6672;">Te enviaremos la confirmación y la invitación al calendario.</span>');
+    const w = chatTextWidget('tu@correo.com', 'email');
+    addBotMessage('¿Cuál es tu <strong>correo electrónico</strong>?<br><span style="font-size:13px;color:#5b6672;">Te enviaremos la confirmación y la invitación al calendario.</span>', w.html);
+    wireTextWidget(w, (text, retry)=>{
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)){
+        showTypingThen(()=>{ addBotMessage('Ese correo no parece válido. Probá de nuevo, por ejemplo: <strong>juan@correo.com</strong>'); retry(); });
+        return;
+      }
+      chatBooking.email = text;
+      showTypingThen(askConfirm);
+    });
   }
 
   function askDate(){
@@ -1578,7 +1655,6 @@
       '¿Para qué <strong>fecha</strong> querés el turno?<br><span style="font-size:13px;color:#5b6672;">' + getDaysHelperText() + '</span>',
       '<div class="chat-widget"><input type="date" id="' + widgetId + '" min="' + todayStr + '"></div>'
     );
-    setChatInput(false);
     const picker = document.getElementById(widgetId);
     picker.addEventListener('change', ()=>{
       if(!picker.value) return;
@@ -1624,7 +1700,7 @@
         ''
       );
       addQuickReplies([
-        { label:'✅ Sí, anotarme en lista de espera', onClick: joinWaitlistFromChat },
+        { label:'✅ Sí, anotarme en lista de espera', onClick: goToWaitlistEmail },
         { label:'📅 Elegir otra fecha', onClick: askDate },
         { label:'↩ Volver al inicio', onClick: showWelcome }
       ]);
@@ -1636,8 +1712,27 @@
       label: t,
       value: t,
       taken: takenTimes.includes(t),
-      onPick: (v)=>{ chatBooking.time = v; selectedTime = v; askConfirm(); }
+      onPick: (v)=>{ chatBooking.time = v; selectedTime = v; askEmail(); }
     })));
+  }
+
+  function goToWaitlistEmail(){
+    if(chatBooking.email){
+      joinWaitlistFromChat();
+      return;
+    }
+    chatStep = 'email_waitlist';
+    clearQuickReplies();
+    const w = chatTextWidget('tu@correo.com', 'email');
+    addBotMessage('¿Cuál es tu <strong>correo electrónico</strong>? Te avisamos ahí si se libera un horario.', w.html);
+    wireTextWidget(w, (text, retry)=>{
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)){
+        showTypingThen(()=>{ addBotMessage('Ese correo no parece válido. Probá de nuevo, por ejemplo: <strong>juan@correo.com</strong>'); retry(); });
+        return;
+      }
+      chatBooking.email = text;
+      showTypingThen(joinWaitlistFromChat);
+    });
   }
 
   async function joinWaitlistFromChat(){
@@ -1647,12 +1742,12 @@
       return;
     }
     addBotMessage('<span class="spinner"></span> Anotándote en la lista de espera...');
-    setChatInput(false);
     clearQuickReplies();
     try{
       await apiPost('joinWaitlist', {
         date: chatBooking.date,
         client: chatBooking.name,
+        phone: chatBooking.phone,
         email: chatBooking.email,
         cut: chatBooking.cut
       });
@@ -1667,7 +1762,6 @@
   function askConfirm(){
     chatStep = 'confirm';
     clearQuickReplies();
-    setChatInput(false);
     const cutInfo = (config.cutTypes||[]).find(c=>c.name===chatBooking.cut);
     const priceTxt = cutInfo && cutInfo.price ? ' (aprox. $' + cutInfo.price + ')' : '';
     const staffName = needsStaffChoice()
@@ -1676,6 +1770,7 @@
     addBotMessage(
       'Resumen de tu turno:<br><br>' +
       '👤 <strong>' + escapeHtml(chatBooking.name) + '</strong><br>' +
+      '📱 ' + escapeHtml(chatBooking.phone) + '<br>' +
       '✂️ <strong>' + escapeHtml(chatBooking.cut) + '</strong>' + priceTxt + '<br>' +
       (staffName ? '🪑 Con <strong>' + escapeHtml(staffName) + '</strong><br>' : '') +
       '📅 <strong>' + formatDate(chatBooking.date) + '</strong> a las <strong>' + chatBooking.time + '</strong><br>' +
@@ -1691,7 +1786,6 @@
 
   async function confirmBookingFromChat(){
     chatStep = 'booking';
-    setChatInput(false);
     clearQuickReplies();
     addBotMessage('<span class="spinner"></span> Confirmando tu turno...');
 
@@ -1713,6 +1807,7 @@
         date: chatBooking.date,
         time: chatBooking.time,
         client: chatBooking.name,
+        phone: chatBooking.phone,
         cut: chatBooking.cut,
         email: chatBooking.email,
         staffId
@@ -1744,7 +1839,6 @@
 
   async function handleLookupName(name){
     chatStep = 'lookup_results';
-    setChatInput(false);
     clearQuickReplies();
     addBotMessage('<span class="spinner"></span> Buscando turnos...');
     try{
@@ -1778,69 +1872,10 @@
     }
   }
 
-  function handleChatSubmit(){
-    if(chatTyping) return;
-    const text = chatInput.value.trim();
-    if(!text) return;
-    chatInput.value = '';
-    chatSendBtn.disabled = true;
-    addUserMessage(text);
-
-    if(chatStep === 'name'){
-      if(text.length < 2){
-        showTypingThen(()=> addBotMessage('Por favor escribí tu nombre completo (mínimo 2 caracteres).'));
-        return;
-      }
-      chatBooking.name = text;
-      showTypingThen(askCutType);
-      return;
-    }
-    if(chatStep === 'email'){
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)){
-        showTypingThen(()=> addBotMessage('Ese correo no parece válido. Probá de nuevo, por ejemplo: <strong>juan@correo.com</strong>'));
-        return;
-      }
-      chatBooking.email = text;
-      showTypingThen(askDate);
-      return;
-    }
-    if(chatStep === 'lookup_name'){
-      showTypingThen(()=> handleLookupName(text));
-      return;
-    }
-    if(chatStep === 'welcome' || chatStep === 'idle'){
-      const lower = text.toLowerCase();
-      if(/agendar|reserv|turno|cita/.test(lower)){
-        showTypingThen(startBookingFlow);
-      }else if(/buscar|mis turnos|consultar/.test(lower)){
-        showTypingThen(startLookupFlow);
-      }else if(/horario|hora|cuando|días|dias/.test(lower)){
-        showTypingThen(showHoursInfo);
-      }else{
-        showTypingThen(()=>{
-          addBotMessage('No estoy seguro de entender. Podés elegir una opción:');
-          addQuickReplies([
-            { label:'📅 Agendar un turno', onClick: startBookingFlow },
-            { label:'🔍 Buscar mis turnos', onClick: startLookupFlow },
-            { label:'🕐 Ver horarios', onClick: showHoursInfo }
-          ]);
-        });
-      }
-    }
-  }
-
   function initChat(){
     chatMessages.innerHTML = '';
     showWelcome();
   }
-
-  chatInput.addEventListener('input', ()=>{
-    chatSendBtn.disabled = chatInput.disabled || !chatInput.value.trim();
-  });
-  chatSendBtn.addEventListener('click', handleChatSubmit);
-  chatInput.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter') handleChatSubmit();
-  });
 
   // ---------- utilidades de fecha y horarios ----------
   const today = new Date();
