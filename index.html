@@ -1605,8 +1605,8 @@
   // Después de BARBER_LOCK_MINUTES sin actividad (mientras el panel está
   // desbloqueado), se cierra la sesión sola y vuelve a pedir la clave.
   // Cambiá el número de acá si querés otro tiempo.
-  const BARBER_LOCK_MINUTES = 2;
-  const BARBER_LOCK_MS = BARBER_LOCK_MINUTES * 60 * 1000;
+  const BARBER_LOCK_MINUTES = 1;
+  const BARBER_LOCK_MS = BARBER_LOCK_MINUTES * 30 * 1000;
   let barberLockTimer = null;
 
   function lockBarberPanelNow(reason){
