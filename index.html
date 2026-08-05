@@ -1524,7 +1524,7 @@
       if(!res.ok) throw new Error('El servidor respondió con error ' + res.status);
       const data = await res.json();
       if(!data || !data.config) throw new Error('La respuesta no tiene el formato esperado.');
-      settingsStatus.innerHTML = '<span style="color:var(--ok)">✓ Conexión exitosa. Barbería encontrada: ' + (data.config.barberName || 'sin nombre') + '.</span>';
+      settingsStatus.innerHTML = '<span style="color:var(--ok)">✓ Conexión exitosa. Barbería encontrada: ' + (data.config.barberName || 'LA ESTACION - BARBERIA') + '.</span>';
     }catch(e){
       settingsStatus.innerHTML = '<span style="color:var(--red)">✕ No se pudo conectar: ' + e.message + '</span>';
     }
