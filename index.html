@@ -1050,7 +1050,7 @@
   // la URL de Apps Script). Es solo local, no se valida contra ningún servidor,
   // y sigue funcionando siempre, esté o no configurada la URL. Cambialo acá
   // por el que prefieras.
-  const DEFAULT_SETUP_PIN = 'BarberShop';
+  const DEFAULT_SETUP_PIN = '1234';
   const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const DIAS_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 
@@ -1807,7 +1807,17 @@
       resetChatBooking();
       chatStep = 'done';
     }catch(e){
-      addBotMessage('No se pudo guardar el turno: ' + escapeHtml(e.message));
+      const msg = e.message || '';
+      if(msg.indexOf('ya fue reservado') !== -1){
+        addBotMessage('😔 ' + escapeHtml(msg.replace(/^Error:\s*/, '')));
+        try{
+          const fresh2 = await apiGet();
+          appointments = fresh2.appointments || [];
+        }catch(e2){}
+        handleDatePick(chatBooking.date);
+        return;
+      }
+      addBotMessage('No se pudo guardar el turno: ' + escapeHtml(msg));
       addQuickReplies([
         { label:'🔄 Reintentar', onClick: askConfirm },
         { label:'↩ Volver al inicio', onClick: showWelcome }
