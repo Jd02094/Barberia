@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LA ESTACION - BARBERIA- </title>
+<title>LA ESTACION - BARBERIA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -183,7 +183,12 @@
   main{ padding:0; }
   #panel-peluquero{
     padding:24px 20px 28px;
-    background:linear-gradient(180deg, #f8f9fc 0%, #eef1f8 100%);
+    background-image:
+      linear-gradient(180deg, rgba(20,15,9,0.90) 0%, rgba(15,11,7,0.94) 100%),
+      var(--bot-logo);
+    background-size: cover, 260% auto;
+    background-position: center, center 24%;
+    background-color:var(--chat-dark-bg-1);
     min-height:calc(100vh - 168px);
   }
   #setupWarning{ margin:16px 20px 0; }
@@ -516,17 +521,20 @@
     text-align:center;
     padding:32px 26px 28px;
     border-radius:20px;
+    background:var(--chat-dark-panel);
+    border:1px solid var(--chat-dark-border);
+    box-shadow:0 8px 30px rgba(0,0,0,0.45);
   }
   .lock-avatar{
     width:56px;
     height:56px;
     margin:0 auto 16px;
     border-radius:50%;
-    background:linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
+    background:linear-gradient(135deg, var(--chat-gold-strong) 0%, #8a6a2c 100%);
     display:flex;
     align-items:center;
     justify-content:center;
-    box-shadow:0 4px 14px rgba(66,133,244,0.3);
+    box-shadow:0 4px 14px rgba(184,147,63,0.35);
   }
   .lock-avatar svg{ width:26px; height:26px; color:#fff; }
   #barberLock h2{
@@ -538,9 +546,10 @@
     margin:0 0 6px;
   }
   #barberLock h2::before{ display:none; }
+  #barberLock h2{ color:var(--chat-gold-text); }
   #barberLock .lock-sub{
     font-size:13.5px;
-    color:#6b7280;
+    color:rgba(231,197,129,0.65);
     line-height:1.5;
     margin:0 0 22px;
   }
@@ -548,25 +557,33 @@
   #barberLock input[type=text]{
     border-radius:28px;
     padding:13px 18px;
-    background:#f1f3f8;
-    border:1px solid #dde1ea;
+    background:rgba(0,0,0,0.3);
+    border:1px solid var(--chat-dark-border);
+    color:var(--chat-gold-text);
     text-align:center;
   }
+  #barberLock input[type=text]::placeholder{ color:rgba(231,197,129,0.4); }
   #barberLock input[type=text]:focus{
-    background:#fff;
+    background:rgba(0,0,0,0.4);
+    border-color:var(--chat-gold-strong);
+    box-shadow:0 0 0 3px var(--chat-gold-soft);
     text-align:left;
   }
   #barberLock .btn{
     width:100%;
     border-radius:28px;
     padding:13px 24px;
-    background:linear-gradient(135deg, #4285f4, #7b61c7);
-    box-shadow:0 3px 10px rgba(66,133,244,0.25);
+    background:linear-gradient(135deg, var(--chat-gold-strong), #8a6a2c);
+    color:#1c1409;
+    box-shadow:0 3px 10px rgba(184,147,63,0.3);
   }
   #barberLock .btn:hover{
-    background:linear-gradient(135deg, #3574e0, #6a50b8);
+    background:linear-gradient(135deg, #d9b76a, #a8843b);
     transform:scale(1.015);
   }
+  #barberLock .msg.ok{ background:rgba(76,122,74,0.18); color:#9fd39b; border-color:rgba(76,122,74,0.4); }
+  #barberLock .msg.warn{ background:rgba(184,147,63,0.15); color:var(--chat-gold-text); border-color:var(--chat-dark-border); }
+  #barberLock .msg.err{ background:rgba(159,43,43,0.18); color:#ef9a92; border-color:rgba(159,43,43,0.4); }
 
   /* ===== Chatbot estilo Gemini ===== */
   .chat-app{
@@ -1695,8 +1712,8 @@
 
   // ---------- header ----------
   function renderShopHeader(){
-    document.getElementById('shopTitle').textContent = config.barberName || 'LA ESTACION -BARBERIA';
-    document.title = (config.barberName || 'LA ESTACION - BARBERIA') + ' · Turnos';
+    document.getElementById('shopTitle').textContent = 'LA ESTACION - BARBERIA';
+    document.title = 'LA ESTACION - BARBERIA · Turnos';
     refreshWaBanner();
   }
 
