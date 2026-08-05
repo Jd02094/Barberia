@@ -896,13 +896,14 @@
         </div>
 
         <div class="wa-setup-box" id="waSetupBox">
-          <strong>Bot automático de WhatsApp</strong> (opcional)<br>
+          <strong>Bot automático de WhatsApp Business</strong> (opcional)<br>
           1. Creá una app en <a href="https://developers.facebook.com" target="_blank" rel="noopener">Meta for Developers</a> → WhatsApp → API Setup.<br>
-          2. En Apps Script → Project Settings → Script Properties, agregá:<br>
+          2. En Apps Script → ⚙ Project Settings → Script properties, agregá:<br>
           &nbsp;&nbsp;<code>WHATSAPP_TOKEN</code>, <code>WHATSAPP_PHONE_ID</code>, <code>WHATSAPP_VERIFY_TOKEN</code><br>
-          3. En Meta → Webhook, pegá la misma URL <code>/exec</code> de tu Web App y suscribite a <em>messages</em>.<br>
-          Detalle completo al inicio de <code>Code.gs</code>.
-          <div id="waBotStatus" style="margin-top:8px;"></div>
+          3. Volvé a <strong>Implementar → Nueva versión</strong> de la Web App.<br>
+          4. En Meta → WhatsApp → Configuration → Webhook, pegá la URL <code>/exec</code> y el mismo verify token; suscribite a <em>messages</em>.<br>
+          El bot permite agendar, ver horarios y consultar turnos por WhatsApp. Además envía confirmación al reservar desde la web.
+          <div id="waBotStatus" style="margin-top:10px;"></div>
         </div>
 
         <div class="field">
@@ -1070,7 +1071,8 @@
     cutTypes: [{name:'Corte clásico', price:0}, {name:'Fade', price:0}, {name:'Corte + barba', price:0}],
     staff: [{id:'default', name:'', calendarId:''}],
     reminderHoursBefore: 24,
-    maxBookingsPerEmailPerDay: 3
+    maxBookingsPerEmailPerDay: 3,
+    whatsappPhone: ''
   };
 
   let config = {...defaultConfig};
@@ -1276,6 +1278,7 @@
     document.getElementById('barberContent').style.display = 'block';
     loadStats();
     loadWaitlistPanel();
+    loadWhatsappStatus();
     startBarberLockTimer();
   }
 
@@ -1375,6 +1378,7 @@
   function renderShopHeader(){
     document.getElementById('shopTitle').textContent = config.barberName || 'Barbería';
     document.title = (config.barberName || 'Barbería') + ' · Turnos';
+    refreshWaBanner();
   }
 
   function renderClientDaysHelper(){ /* chatbot maneja horarios en conversación */ }
@@ -1539,11 +1543,28 @@
       'Puedo ayudarte a <strong>agendar un turno</strong>, <strong>buscar tus reservas</strong> o contarte nuestros horarios.<br><br>' +
       '¿Qué te gustaría hacer?'
     );
-    addQuickReplies([
+    const welcomeReplies = [
       { label:'📅 Agendar un turno', onClick: startBookingFlow },
       { label:'🔍 Buscar mis turnos', onClick: startLookupFlow },
       { label:'🕐 Ver horarios', onClick: showHoursInfo }
-    ]);
+    ];
+    if(getWhatsappPhone()){
+      welcomeReplies.push({
+        label: '📲 Escribir por WhatsApp',
+        onClick: function(){
+          const phone = getWhatsappPhone();
+          const shop = config.barberName || 'la barbería';
+          const msg = 'Hola! Les escribo desde la web de ' + shop + '.';
+          window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
+          addBotMessage('Se abrió WhatsApp. Podés escribirnos cuando quieras 👋');
+          addQuickReplies([
+            { label:'📅 Agendar un turno', onClick: startBookingFlow },
+            { label:'↩ Volver al inicio', onClick: showWelcome }
+          ]);
+        }
+      });
+    }
+    addQuickReplies(welcomeReplies);
   }
 
   function startBookingFlow(){
@@ -1845,10 +1866,24 @@
         'Te llegará un correo con la confirmación y el enlace para gestionar tu turno.'
       );
       renderAppointmentsList();
-      addQuickReplies([
+      const confirmedApt = {
+        id: result.appointment.id,
+        date: chatBooking.date,
+        time: chatBooking.time,
+        client: chatBooking.name,
+        cut: chatBooking.cut,
+        phone: chatBooking.phone,
+        price: result.appointment.price
+      };
+      const postBookReplies = [
+        {
+          label: '📲 Enviar recordatorio por WhatsApp',
+          onClick: function(){ openWhatsappReminder(confirmedApt); }
+        },
         { label:'📅 Agendar otro turno', onClick: startBookingFlow },
         { label:'↩ Volver al inicio', onClick: showWelcome }
-      ]);
+      ];
+      addQuickReplies(postBookReplies);
       resetChatBooking();
       chatStep = 'done';
     }catch(e){
@@ -1939,6 +1974,52 @@
     return DIAS_LARGO[dt.getDay()] + ' ' + d + '/' + m + '/' + y;
   }
 
+  function getWhatsappPhone(){
+    const raw = (config.whatsappPhone || '').replace(/\D/g, '');
+    return raw.length >= 8 ? raw : '';
+  }
+
+  function openWhatsappReminder(apt){
+    const phone = getWhatsappPhone(); // opcional: si el peluquero lo cargó, va directo a ese número
+    const shop = config.barberName || 'la barbería';
+    const priceTxt = apt.price ? (' · $' + apt.price) : '';
+    const msg =
+      'Recordatorio de mi turno en ' + shop + ':\n\n' +
+      '👤 ' + (apt.client || '') + '\n' +
+      '📅 ' + formatDate(apt.date) + ' a las ' + (apt.time || '') + '\n' +
+      '✂️ ' + (apt.cut || 'Sin especificar') + priceTxt + '\n' +
+      'N.° ' + (apt.id || '') + '\n\n' +
+      '¡Nos vemos!';
+    // Con número de la barbería → chat directo. Sin número → WhatsApp deja elegir contacto
+    // (sirve para mandártelo a vos mismo como recordatorio). Funciona en Android, iOS y PC.
+    const url = phone
+      ? ('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg))
+      : ('https://wa.me/?text=' + encodeURIComponent(msg));
+    window.open(url, '_blank', 'noopener,noreferrer');
+    if(phone){
+      addBotMessage('Listo ✅ Se abrió WhatsApp con el recordatorio listo para enviar a la barbería. Solo tocá <strong>Enviar</strong>.');
+    }else{
+      addBotMessage('Listo ✅ Se abrió WhatsApp con el mensaje del turno. Elegí un contacto (podés enviártelo a vos mismo como recordatorio) y tocá <strong>Enviar</strong>.');
+    }
+    addQuickReplies([
+      { label:'📅 Agendar otro turno', onClick: startBookingFlow },
+      { label:'↩ Volver al inicio', onClick: showWelcome }
+    ]);
+  }
+
+  function refreshWaBanner(){
+    const banner = document.getElementById('waBanner');
+    if(!banner) return;
+    const phone = getWhatsappPhone();
+    if(phone){
+      banner.style.display = 'flex';
+      banner.innerHTML = 'También podés escribirnos por <a href="https://wa.me/' + phone + '" target="_blank" rel="noopener">WhatsApp</a>';
+    }else{
+      banner.style.display = 'none';
+      banner.innerHTML = '';
+    }
+  }
+
   // ---------- barber: days config ----------
   const daysGrid = document.getElementById('daysGrid');
   DIAS.forEach((label, idx)=>{
@@ -1959,6 +2040,8 @@
     document.getElementById('slotMin').value = String(config.slotMin);
     document.getElementById('reminderHoursBefore').value = config.reminderHoursBefore || 24;
     document.getElementById('maxBookingsPerEmailPerDay').value = config.maxBookingsPerEmailPerDay || 3;
+    var waEl = document.getElementById('whatsappPhoneInput');
+    if(waEl) waEl.value = config.whatsappPhone || '';
     document.querySelectorAll('.day-chip').forEach(chip=>{
       const d = Number(chip.dataset.day);
       chip.classList.toggle('on', config.days.includes(d));
@@ -2050,8 +2133,9 @@
     const reminderHoursBefore = Number(document.getElementById('reminderHoursBefore').value) || 24;
     const maxBookingsPerEmailPerDay = Number(document.getElementById('maxBookingsPerEmailPerDay').value) || 3;
     const staff = workingStaff.length > 0 ? workingStaff.slice() : [{id:'default', name:'', calendarId:''}];
+    const whatsappPhone = (document.getElementById('whatsappPhoneInput').value || '').replace(/\D/g, '');
 
-    const newConfig = { barberName:name, startHour:start, endHour:end, slotMin, days, cutTypes: workingCutTypes.slice(), staff, reminderHoursBefore, maxBookingsPerEmailPerDay, blocked: config.blocked };
+    const newConfig = { barberName:name, startHour:start, endHour:end, slotMin, days, cutTypes: workingCutTypes.slice(), staff, reminderHoursBefore, maxBookingsPerEmailPerDay, blocked: config.blocked, whatsappPhone };
     msgEl.innerHTML = '<div class="msg"><span class="spinner"></span>Guardando...</div>';
     try{
       await apiPost('saveConfig', newConfig);
@@ -2294,6 +2378,27 @@
         </div>`;
     }catch(e){
       box.innerHTML = '<div class="msg err">No se pudieron cargar las estadísticas.</div>';
+    }
+  }
+
+  // ---------- estado del bot de WhatsApp ----------
+  async function loadWhatsappStatus(){
+    const el = document.getElementById('waBotStatus');
+    if(!el || !barberToken || !apiReady) return;
+    el.innerHTML = '<span class="spinner"></span> Consultando estado del bot…';
+    try{
+      const data = await apiPost('whatsappStatus', {});
+      if(data.configured){
+        el.innerHTML = '<div class="msg ok" style="margin:0;">✓ Bot de WhatsApp <strong>activo</strong> (Phone ID ' + escapeHtml(data.phoneIdPreview || '') + '). Los clientes pueden escribir al número de la API y reservar por chat.</div>';
+      }else{
+        const missing = [];
+        if(!data.hasToken) missing.push('WHATSAPP_TOKEN');
+        if(!data.hasPhoneId) missing.push('WHATSAPP_PHONE_ID');
+        if(!data.hasVerifyToken) missing.push('WHATSAPP_VERIFY_TOKEN');
+        el.innerHTML = '<div class="msg warn" style="margin:0;">Bot aún no configurado. Faltan en Script properties: <code>' + missing.join('</code>, <code>') + '</code></div>';
+      }
+    }catch(e){
+      el.innerHTML = '<div class="msg warn" style="margin:0;">No se pudo consultar el estado del bot. ¿Reimplementaste la Web App tras actualizar Code.gs?</div>';
     }
   }
 
