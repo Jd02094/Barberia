@@ -1287,7 +1287,7 @@
   const BARBER_LOCK_MS = BARBER_LOCK_MINUTES * 60 * 1000;
   let barberLockTimer = null;
 
-  function lockBarberPanelNow(){
+  function lockBarberPanelNow(reason){
     barberToken = '';
     try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
     stopBarberLockTimer();
@@ -1295,7 +1295,10 @@
     if(activeTab && activeTab.dataset.view === 'peluquero'){
       showBarberLock();
       const msgEl = document.getElementById('unlockMsg');
-      if(msgEl) msgEl.innerHTML = '<div class="msg err">Sesión cerrada por inactividad. Ingresá tu clave de nuevo.</div>';
+      const text = reason === 'guardado'
+        ? 'Sesión cerrada por seguridad tras guardar los cambios. Ingresá tu clave de nuevo.'
+        : 'Sesión cerrada por inactividad. Ingresá tu clave de nuevo.';
+      if(msgEl) msgEl.innerHTML = '<div class="msg err">' + text + '</div>';
     }
   }
 
@@ -2053,10 +2056,13 @@
     try{
       await apiPost('saveConfig', newConfig);
       config = newConfig;
-      msgEl.innerHTML = '<div class="msg ok">Configuración guardada en la Hoja de cálculo.</div>';
+      msgEl.innerHTML = '<div class="msg ok">Configuración guardada. Cerrando sesión por seguridad…</div>';
       renderShopHeader();
       renderStaffOptions();
       if(document.getElementById('panel-cliente').classList.contains('active')) initChat();
+      // Por seguridad, después de guardar cambios de configuración se cierra
+      // la sesión del peluquero sola y hay que volver a poner la clave.
+      setTimeout(function(){ lockBarberPanelNow('guardado'); }, 1200);
     }catch(e){
       msgEl.innerHTML = '<div class="msg err">No se pudo guardar. ' + e.message + '</div>';
     }
