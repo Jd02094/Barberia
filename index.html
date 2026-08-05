@@ -1046,12 +1046,11 @@
 (function(){
   const STORAGE_KEY = 'barbershop:sheetsApiUrl';
   const TOKEN_KEY = 'barbershop:barberToken';
-  // PIN predeterminado: SOLO sirve para entrar a Configuración la primerísima vez,
-  // antes de que exista una URL de Apps Script configurada (todavía no hay servidor
-  // contra el cual validar nada). Cámbialo aquí si deseas usar uno distinto.
-  // Apenas configures la URL, este PIN deja de funcionar: a partir de ahí, entrar a
-  // Configuración exige tu clave de peluquero real, validada en el servidor.
-  const DEFAULT_SETUP_PIN = '1234';
+  // PIN fijo y PERMANENTE para entrar a Configuración técnica (donde se pega
+  // la URL de Apps Script). Es solo local, no se valida contra ningún servidor,
+  // y sigue funcionando siempre, esté o no configurada la URL. Cambialo acá
+  // por el que prefieras.
+  const DEFAULT_SETUP_PIN = 'BarberShop';
   const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const DIAS_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 
@@ -1122,47 +1121,26 @@
   function requestPinThenOpenSettings(){
     pinInput.value = '';
     pinStatus.innerHTML = '';
-    pinDesc.textContent = apiReady
-      ? 'Ingresa tu clave de peluquero para abrir la configuración técnica.'
-      : 'Primera vez: ingresa el PIN predeterminado (' + DEFAULT_SETUP_PIN + ') para pegar la URL de tu Apps Script.';
+    pinDesc.textContent = 'Ingresa el PIN (' + DEFAULT_SETUP_PIN + ') para abrir la configuración técnica.';
     pinOverlay.classList.add('open');
     pinInput.focus();
   }
   function closePinModal(){ pinOverlay.classList.remove('open'); }
 
-  async function submitPin(){
+  // El botón ⚙ de Configuración técnica (URL de Apps Script) ahora usa
+  // SIEMPRE este PIN fijo local, sin depender del servidor ni de la clave
+  // de peluquero. Cambialo acá si querés otro PIN permanente.
+  function submitPin(){
     const typed = pinInput.value.trim();
     if(!typed){ return; }
 
-    if(!apiReady){
-      // todavía no hay servidor contra el cual validar: solo acepta el PIN predeterminado
-      if(typed === DEFAULT_SETUP_PIN){
-        closePinModal();
-        openSettings();
-      }else{
-        pinStatus.innerHTML = '<span style="color:var(--red)">PIN incorrecto.</span>';
-        pinInput.value = '';
-        pinInput.focus();
-      }
-      return;
-    }
-
-    // ya hay servidor conectado: misma validación real que el modo peluquero
-    pinStatus.innerHTML = '<div class="msg"><span class="spinner"></span>Verificando...</div>';
-    try{
-      const token = await loginOnServer(typed);
-      if(token){
-        barberToken = token;
-        try{ localStorage.setItem(TOKEN_KEY, token); }catch(e){}
-        closePinModal();
-        openSettings();
-      }else{
-        pinStatus.innerHTML = '<span style="color:var(--red)">Clave incorrecta.</span>';
-        pinInput.value = '';
-        pinInput.focus();
-      }
-    }catch(e){
-      pinStatus.innerHTML = '<span style="color:var(--red)">No se pudo verificar la clave.</span>';
+    if(typed === DEFAULT_SETUP_PIN){
+      closePinModal();
+      openSettings();
+    }else{
+      pinStatus.innerHTML = '<span style="color:var(--red)">PIN incorrecto.</span>';
+      pinInput.value = '';
+      pinInput.focus();
     }
   }
 
