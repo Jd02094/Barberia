@@ -1143,7 +1143,7 @@
         <h2>Configuración de la barbería</h2>
         <div class="helper" style="margin-bottom:14px;">Todos los campos son obligatorios.</div>
         <div class="field">
-          <label for="barberNameInput">Nombre de la barbería <span class="required-mark">*</span></label>
+          <label for="barberNameInput">LA ESTACION - BARBERIA <span class="required-mark">*</span></label>
           <input type="text" id="barberNameInput" placeholder="Ej: Barbería El Corte" required>
         </div>
 
@@ -1696,7 +1696,7 @@
   // ---------- header ----------
   function renderShopHeader(){
     document.getElementById('shopTitle').textContent = config.barberName || 'LA ESTACION -BARBERIA';
-    document.title = (config.barberName || 'Barbería') + ' · Turnos';
+    document.title = (config.barberName || 'LA ESTACION - BARBERIA') + ' · Turnos';
     refreshWaBanner();
   }
 
@@ -1872,7 +1872,7 @@
         label: '📲 Escribir por WhatsApp',
         onClick: function(){
           const phone = getWhatsappPhone();
-          const shop = config.barberName || 'la barbería';
+          const shop = config.barberName || 'LA ESTACION - BARBERIA';
           const msg = 'Hola! Les escribo desde la web de ' + shop + '.';
           window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
           addBotMessage('Se abrió WhatsApp. Podés escribirnos cuando quieras 👋');
@@ -2300,7 +2300,7 @@
 
   function openWhatsappReminder(apt){
     const phone = getWhatsappPhone(); // opcional: si el peluquero lo cargó, va directo a ese número
-    const shop = config.barberName || 'la barbería';
+    const shop = config.barberName || 'LA ESTACION - BARBERIA';
     const priceTxt = apt.price ? (' · $' + apt.price) : '';
     const msg =
       'Recordatorio de mi turno en ' + shop + ':\n\n' +
@@ -2429,7 +2429,7 @@
   });
 
   document.getElementById('saveConfigBtn').addEventListener('click', async ()=>{
-    const name = document.getElementById('barberNameInput').value.trim() || 'Barbería';
+    const name = document.getElementById('barberNameInput').value.trim() || 'LA ESTACION - BARBERIA';
     const start = Number(document.getElementById('startHour').value);
     const end = Number(document.getElementById('endHour').value);
     const slotMin = Number(document.getElementById('slotMin').value);
