@@ -1269,13 +1269,55 @@
   function showBarberLock(){
     document.getElementById('barberLock').style.display = 'block';
     document.getElementById('barberContent').style.display = 'none';
+    stopBarberLockTimer();
   }
   function showBarberContent(){
     document.getElementById('barberLock').style.display = 'none';
     document.getElementById('barberContent').style.display = 'block';
     loadStats();
     loadWaitlistPanel();
+    startBarberLockTimer();
   }
+
+  // ---------- Bloqueo automático del panel del peluquero por inactividad ----------
+  // Después de BARBER_LOCK_MINUTES sin actividad (mientras el panel está
+  // desbloqueado), se cierra la sesión sola y vuelve a pedir la clave.
+  // Cambiá el número de acá si querés otro tiempo.
+  const BARBER_LOCK_MINUTES = 2;
+  const BARBER_LOCK_MS = BARBER_LOCK_MINUTES * 60 * 1000;
+  let barberLockTimer = null;
+
+  function lockBarberPanelNow(){
+    barberToken = '';
+    try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
+    stopBarberLockTimer();
+    const activeTab = document.querySelector('.tab.active');
+    if(activeTab && activeTab.dataset.view === 'peluquero'){
+      showBarberLock();
+      const msgEl = document.getElementById('unlockMsg');
+      if(msgEl) msgEl.innerHTML = '<div class="msg err">Sesión cerrada por inactividad. Ingresá tu clave de nuevo.</div>';
+    }
+  }
+
+  function startBarberLockTimer(){
+    stopBarberLockTimer();
+    barberLockTimer = setTimeout(lockBarberPanelNow, BARBER_LOCK_MS);
+  }
+  function stopBarberLockTimer(){
+    if(barberLockTimer){ clearTimeout(barberLockTimer); barberLockTimer = null; }
+  }
+  function resetBarberLockTimer(){
+    // solo reinicia la cuenta si hay una sesión de peluquero activa Y esa
+    // pestaña es la que está viendo la persona en este momento
+    const activeTab = document.querySelector('.tab.active');
+    const onBarberTab = activeTab && activeTab.dataset.view === 'peluquero';
+    if(barberToken && onBarberTab && document.getElementById('barberContent').style.display !== 'none'){
+      startBarberLockTimer();
+    }
+  }
+  ['mousemove','mousedown','keydown','touchstart','scroll'].forEach(function(evt){
+    document.addEventListener(evt, resetBarberLockTimer, { passive:true });
+  });
 
   async function tryUnlock(){
     const msgEl = document.getElementById('unlockMsg');
