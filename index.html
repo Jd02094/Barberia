@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -141,7 +143,7 @@
     font-size:17px;
   }
   .theme-switch::before{
-    content:'     ';
+    content:'☀︎     ☾';
     position:relative;
     z-index:1;
     width:100%;
@@ -463,13 +465,7 @@
     background:#fff;
     border-top:1px solid var(--line);
   }
-  .connection-status{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:7px;
-    min-height:18px;
-  }
+  .connection-status{ display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:18px; }
   .connection-dot{ width:8px; height:8px; border-radius:50%; background:#aeb6c2; box-shadow:0 0 0 3px rgba(174,182,194,.16); }
   .connection-status.online .connection-dot{ background:#4C7A4A; box-shadow:0 0 0 3px rgba(76,122,74,.16); }
   .connection-status.offline .connection-dot{ background:var(--red); box-shadow:0 0 0 3px rgba(159,43,43,.14); }
@@ -1383,9 +1379,7 @@
     </section>
   </main>
 
-  <footer id="syncFooter" aria-live="polite">
-    <span class="connection-status checking" id="connectionStatus"><span class="connection-dot"></span><span id="connectionText">Conectando con App Script…</span></span>
-  </footer>
+  <footer id="syncFooter" aria-live="polite"><span class="connection-status checking" id="connectionStatus"><span class="connection-dot"></span><span id="connectionText">Conectando con App Script…</span></span></footer>
 </div>
 
 <div class="modal-overlay" id="pinOverlay">
@@ -1488,7 +1482,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwJ6FhiIbCQKg_UdReUWw9k2mZYmz6JHBY25d8TkemYhkHxeEBVBl5Dyr9o0-6ECkdAnA/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbz2LzOFU6-vNNVSLBGE3LJchp0RBeOgoMOe_HKYT99jn98QvIafZCJt8XIIGX0V9U6SNw/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -1525,8 +1519,7 @@
     if(!el || !text) return;
     el.className = 'connection-status ' + state;
     if(state === 'online'){
-      const now = new Date();
-      text.textContent = 'App Script conectado · sincronizado a las ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      text.textContent = 'App Script conectado · sincronizado a las ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     }else if(state === 'offline'){
       text.textContent = 'App Script sin conexión' + (detail ? ' · ' + detail : '');
     }else{
@@ -1669,34 +1662,24 @@
   });
 
   // ---------- API helpers ----------
-  let jsonpSequence = 0;
-  function jsonpRequest(params){
-    return new Promise((resolve, reject)=>{
-      const callback = 'barbershopJsonp' + Date.now() + '_' + (++jsonpSequence);
-      const query = new URLSearchParams(Object.assign({}, params, { callback })).toString();
-      const script = document.createElement('script');
-      const separator = SHEETS_API_URL.includes('?') ? '&' : '?';
-      let timeout;
-      function cleanup(){
-        clearTimeout(timeout);
-        delete window[callback];
-        if(script.parentNode) script.parentNode.removeChild(script);
-      }
-      window[callback] = (data)=>{ cleanup(); resolve(data); };
-      script.onerror = ()=>{ cleanup(); reject(new Error('No se pudo conectar con la agenda.')); };
-      timeout = setTimeout(()=>{ cleanup(); reject(new Error('La agenda tardó demasiado en responder.')); }, 15000);
-      script.src = SHEETS_API_URL + separator + query;
-      document.head.appendChild(script);
-    });
-  }
   async function apiGet(){
-    const data = await jsonpRequest({});
-    if(!data || !data.ok) throw new Error((data && data.error) || 'Respuesta inválida de App Script.');
-    return data;
+    // Cada consulta debe leer el estado actual de la agenda, sin caché.
+    const separator = SHEETS_API_URL.includes('?') ? '&' : '?';
+    const res = await fetch(SHEETS_API_URL + separator + '_ts=' + Date.now(), {
+      method:'GET', cache:'no-store'
+    });
+    if(!res.ok) throw new Error('Error de red al leer datos');
+    return res.json();
   }
   async function apiPost(action, payload){
     const fullPayload = Object.assign({}, payload, { token: barberToken });
-    const data = await jsonpRequest({ action, payload: JSON.stringify(fullPayload) });
+    const res = await fetch(SHEETS_API_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' }, // evita preflight CORS
+      body: JSON.stringify({ action, payload: fullPayload })
+    });
+    if(!res.ok) throw new Error('Error de red al guardar datos');
+    const data = await res.json();
     if(!data.ok){
       if(data.error && data.error.indexOf('Sesión') !== -1){
         barberToken = '';
@@ -1705,7 +1688,6 @@
       }
       throw new Error(data.error || 'Error desconocido');
     }
-    setConnectionStatus('online');
     return data;
   }
 
@@ -1714,23 +1696,22 @@
   // sesión firmado por el servidor (válido por unas horas); si no, devuelve null.
   // La clave en sí nunca se guarda ni se reenvía en cada acción.
   async function loginOnServer(candidate){
-    const data = await jsonpRequest({ action:'checkSecret', payload:JSON.stringify({ secret:candidate }) });
+    const res = await fetch(SHEETS_API_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'checkSecret', payload:{ secret: candidate } })
+    });
+    const data = await res.json();
     return data.ok ? data.token : null;
   }
 
   async function loadAll(){
-    if(!apiReady){
-      setConnectionStatus('offline', 'falta configurar la URL');
-      return;
-    }
-    setConnectionStatus('checking');
+    if(!apiReady) return;
     try{
       const data = await apiGet();
       applyServerData(data);
-      setConnectionStatus('online');
     }catch(e){
       console.error(e);
-      setConnectionStatus('offline', e.message);
     }
     renderShopHeader();
     renderStaffOptions();
@@ -2966,7 +2947,8 @@
       return;
     }
     try{
-      const data = await jsonpRequest({ action:'getAppointment', id:selfManageId, token:selfManageToken });
+      const res = await fetch(SHEETS_API_URL + '?action=getAppointment&id=' + encodeURIComponent(selfManageId) + '&token=' + encodeURIComponent(selfManageToken));
+      const data = await res.json();
       if(!data.ok){
         content.innerHTML = '<div class="msg err">' + (data.error || 'Turno no encontrado.') + '</div>';
         return;
