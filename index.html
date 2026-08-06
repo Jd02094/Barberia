@@ -489,27 +489,23 @@
   .connection-status.offline .connection-dot{ background:var(--red); box-shadow:0 0 0 3px rgba(159,43,43,.14); }
   .connection-status.checking .connection-dot{ background:var(--gold); animation:connectionPulse 1s ease-in-out infinite; }
   .dev-access-dot{
-    display:inline-block;
-    width:14px;
-    height:14px;
-    margin-left:10px;
-    padding:0;
-    border:none;
-    background:transparent;
-    cursor:default;
-    vertical-align:middle;
-    position:relative;
-  }
-  .dev-access-dot::after{
-    content:'';
     position:absolute;
-    top:50%; left:50%;
-    width:3px; height:3px;
+    top:20px;
+    left:66px;
+    width:38px;
+    height:38px;
     border-radius:50%;
-    background:currentColor;
-    opacity:.25;
-    transform:translate(-50%,-50%);
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:all .15s ease;
   }
+  .dev-access-dot:hover{ background:var(--gold); color:#fff8df; border-color:var(--gold); }
+  .dev-access-dot svg{ width:18px; height:18px; }
   @keyframes connectionPulse{ 50%{ transform:scale(.65); opacity:.5; } }
 
   .spinner{
@@ -533,6 +529,7 @@
     .ticket-stub{ width:76px; }
     .theme-switch{ top:14px; right:14px; }
     .cache-reload-btn{ top:14px; left:14px; }
+    .dev-access-dot{ top:14px; left:58px; width:34px; height:34px; }
     .chat-app{ height:calc(100vh - 155px); min-height:400px; }
     .msg-row{ max-width:94%; }
   }
@@ -1184,6 +1181,7 @@
   body.theme-dark header .eyebrow{ color:var(--chat-gold-strong); }
   body.theme-dark header .sub{ color:rgba(231,197,129,.65); }
   body.theme-dark .cache-reload-btn{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
+  body.theme-dark .dev-access-dot{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
   body.theme-dark .theme-switch{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); }
   body.theme-dark .theme-switch .sun{ color:rgba(231,197,129,.45); }
   body.theme-dark .theme-switch .moon{ color:var(--chat-gold-text); }
@@ -1243,6 +1241,9 @@
   <header>
     <button class="cache-reload-btn" id="clearCacheBtn" aria-label="Borrar caché y recargar" title="Borrar caché y recargar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </button>
+    <button class="dev-access-dot" id="devAccessBtn" aria-label="Configuración técnica" title="Configuración técnica">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
     <button class="theme-switch" id="themeToggle" aria-label="Activar tema oscuro" title="Cambiar tema">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -1424,7 +1425,7 @@
     </section>
   </main>
 
-  <footer id="syncFooter" aria-live="polite"><span class="connection-status checking" id="connectionStatus"><span class="connection-dot"></span><span id="connectionText">Conectando con App Script…</span></span><button class="dev-access-dot" id="devAccessBtn" aria-label="." tabindex="-1"></button></footer>
+  <footer id="syncFooter" aria-live="polite"><span class="connection-status checking" id="connectionStatus"><span class="connection-dot"></span><span id="connectionText">Conectando con App Script…</span></span></footer>
 </div>
 
 <div class="modal-overlay" id="pinOverlay">
