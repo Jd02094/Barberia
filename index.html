@@ -155,6 +155,26 @@
   .theme-switch .theme-icon{ position:relative; z-index:1; width:30px; text-align:center; font-size:16px; line-height:30px; }
   .theme-switch .sun{ color:#7f5b11; }
   .theme-switch .moon{ color:#6b7280; }
+  .cache-reload-btn{
+    position:absolute;
+    top:20px;
+    left:20px;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:all .15s ease;
+  }
+  .cache-reload-btn:hover{ background:var(--gold); color:#fff8df; border-color:var(--gold); }
+  .cache-reload-btn:disabled{ opacity:.6; cursor:default; }
+  .cache-reload-btn svg{ width:18px; height:18px; }
+  .cache-reload-btn.spinning svg{ animation:spin .8s linear infinite; }
   header .eyebrow{
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
@@ -490,6 +510,7 @@
     #panel-peluquero{ padding:16px 14px 20px; }
     .ticket-stub{ width:76px; }
     .theme-switch{ top:14px; right:14px; }
+    .cache-reload-btn{ top:14px; left:14px; }
     .chat-app{ height:calc(100vh - 155px); min-height:400px; }
     .msg-row{ max-width:94%; }
   }
@@ -1140,6 +1161,7 @@
   body.theme-dark header h1{ color:var(--chat-gold-text); }
   body.theme-dark header .eyebrow{ color:var(--chat-gold-strong); }
   body.theme-dark header .sub{ color:rgba(231,197,129,.65); }
+  body.theme-dark .cache-reload-btn{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
   body.theme-dark .theme-switch{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); }
   body.theme-dark .theme-switch .sun{ color:rgba(231,197,129,.45); }
   body.theme-dark .theme-switch .moon{ color:var(--chat-gold-text); }
@@ -1197,6 +1219,9 @@
 <div class="stripe"></div>
 <div class="app" id="mainApp">
   <header>
+    <button class="cache-reload-btn" id="clearCacheBtn" aria-label="Borrar caché y recargar" title="Borrar caché y recargar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </button>
     <button class="theme-switch" id="themeToggle" aria-label="Activar tema oscuro" title="Cambiar tema">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
@@ -1480,7 +1505,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbw5_tWKv6_bQ9JYnhk6LYklaxfwzPIPax9PMV8tziXF5nKbPXRQ0V7qGTfW35xSPU5QnQ/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwss_fZaVnvA_xbRbvCZqqipXL9DcH1_cGZOeTgjvda7JIIsotERMGVUMWej9jvywedXw/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -1613,6 +1638,35 @@
   try{ savedTheme = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
   applyTheme(savedTheme);
   themeToggle.addEventListener('click', ()=>applyTheme(document.body.classList.contains('theme-dark') ? 'light' : 'dark'));
+
+  // ---------- Borrar caché y recargar ----------
+  // Limpia Cache Storage y cualquier Service Worker registrado (si los hubiera),
+  // y fuerza una recarga completa agregando un parámetro único a la URL para que
+  // el navegador no sirva una versión vieja del HTML/JS desde su caché HTTP.
+  // No borra localStorage (URL de Apps Script configurada, sesión del peluquero,
+  // tema) para no desconfigurar nada; solo limpia caché de archivos.
+  const clearCacheBtn = document.getElementById('clearCacheBtn');
+  if(clearCacheBtn){
+    clearCacheBtn.addEventListener('click', async ()=>{
+      clearCacheBtn.disabled = true;
+      clearCacheBtn.classList.add('spinning');
+      try{
+        if('caches' in window){
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k)=>caches.delete(k)));
+        }
+        if('serviceWorker' in navigator){
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r)=>r.unregister()));
+        }
+      }catch(e){
+        console.error('Error borrando caché:', e);
+      }
+      const url = new URL(window.location.href);
+      url.searchParams.set('_cb', Date.now().toString());
+      window.location.href = url.toString();
+    });
+  }
   document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
   overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeSettings(); });
   document.addEventListener('keydown', (e)=>{
