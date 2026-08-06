@@ -488,6 +488,28 @@
   .connection-status.online .connection-dot{ background:#4C7A4A; box-shadow:0 0 0 3px rgba(76,122,74,.16); }
   .connection-status.offline .connection-dot{ background:var(--red); box-shadow:0 0 0 3px rgba(159,43,43,.14); }
   .connection-status.checking .connection-dot{ background:var(--gold); animation:connectionPulse 1s ease-in-out infinite; }
+  .dev-access-dot{
+    display:inline-block;
+    width:14px;
+    height:14px;
+    margin-left:10px;
+    padding:0;
+    border:none;
+    background:transparent;
+    cursor:default;
+    vertical-align:middle;
+    position:relative;
+  }
+  .dev-access-dot::after{
+    content:'';
+    position:absolute;
+    top:50%; left:50%;
+    width:3px; height:3px;
+    border-radius:50%;
+    background:currentColor;
+    opacity:.25;
+    transform:translate(-50%,-50%);
+  }
   @keyframes connectionPulse{ 50%{ transform:scale(.65); opacity:.5; } }
 
   .spinner{
@@ -1402,7 +1424,7 @@
     </section>
   </main>
 
-  <footer id="syncFooter" aria-live="polite"><span class="connection-status checking" id="connectionStatus"><span class="connection-dot"></span><span id="connectionText">Conectando con App Script…</span></span></footer>
+  <footer id="syncFooter" aria-live="polite"><span class="connection-status checking" id="connectionStatus"><span class="connection-dot"></span><span id="connectionText">Conectando con App Script…</span></span><button class="dev-access-dot" id="devAccessBtn" aria-label="." tabindex="-1"></button></footer>
 </div>
 
 <div class="modal-overlay" id="pinOverlay">
@@ -1414,7 +1436,7 @@
     </div>
     <div class="field">
       <label for="pinInput">PIN</label>
-      <input type="text" id="pinInput" placeholder="••••" inputmode="numeric" required>
+      <input type="password" id="pinInput" placeholder="••••" inputmode="numeric" autocomplete="off" required>
     </div>
     <div class="modal-actions">
       <button class="btn" id="pinContinueBtn">Continuar</button>
@@ -1495,8 +1517,11 @@
   const TOKEN_KEY = 'barbershop:barberToken';
   // PIN fijo y PERMANENTE para entrar a Configuración técnica (donde se pega
   // la URL de Apps Script). Es solo local, no se valida contra ningún servidor,
-  // y sigue funcionando siempre, esté o no configurada la URL. Cambialo acá
-  // por el que prefieras.
+  // y sigue funcionando siempre, esté o no configurada la URL.
+  // 👉 CAMBIALO por uno propio antes de publicar el sitio (no dejes '1234').
+  // El botón para abrir esto es el puntito casi invisible al lado del
+  // indicador de conexión, en el pie de página — no está marcado como
+  // "Configuración" a propósito, para que no lo toque cualquiera.
   const DEFAULT_SETUP_PIN = '1234';
   const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const DIAS_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -1583,7 +1608,7 @@
   function requestPinThenOpenSettings(){
     pinInput.value = '';
     pinStatus.innerHTML = '';
-    pinDesc.textContent = 'Ingresa el PIN (' + DEFAULT_SETUP_PIN + ') para abrir la configuración técnica.';
+    pinDesc.textContent = 'Ingresá el PIN para abrir la configuración técnica.';
     pinOverlay.classList.add('open');
     pinInput.focus();
   }
@@ -1608,6 +1633,14 @@
 
   document.getElementById('pinContinueBtn').addEventListener('click', submitPin);
   document.getElementById('closePinBtn').addEventListener('click', closePinModal);
+
+  // Botón discreto del pie de página: no dice "Configuración" en ningún lado
+  // (ni en el aria-label ni en el title), es solo un puntito de bajo contraste.
+  // Al tocarlo pide el PIN antes de mostrar cualquier opción técnica.
+  const devAccessBtn = document.getElementById('devAccessBtn');
+  if(devAccessBtn){
+    devAccessBtn.addEventListener('click', requestPinThenOpenSettings);
+  }
   pinOverlay.addEventListener('click', (e)=>{ if(e.target === pinOverlay) closePinModal(); });
   pinInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') submitPin(); });
 
