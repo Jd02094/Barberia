@@ -2049,7 +2049,7 @@
     });
   }
 
-  function handleDatePick(dateStr){
+  async function handleDatePick(dateStr){
     chatBooking.date = dateStr;
     selectedTime = null;
     chatBooking.time = '';
@@ -2064,6 +2064,22 @@
       askDate();
       return;
     }
+
+    // Refrescamos los turnos desde Sheets justo antes de mostrar los horarios,
+    // para que la disponibilidad que ve el usuario esté lo más al día posible
+    // (evita mostrar como "libre" un horario que otra persona acaba de tomar).
+    clearQuickReplies();
+    const loadingMsg = addBotMessage('<span class="spinner"></span> Consultando horarios disponibles...');
+    try{
+      const fresh = await apiGet();
+      appointments = fresh.appointments || [];
+    }catch(e){
+      // Si falla el refresco, seguimos con los datos que ya teníamos en memoria
+      // en vez de bloquear al usuario; la validación final antes de confirmar
+      // igual va a proteger contra choques de horario.
+      console.error('No se pudo refrescar turnos: ' + e.message);
+    }
+    if(loadingMsg && loadingMsg.remove) loadingMsg.remove();
 
     const staffId = chatBooking.staffId || selectedStaffId || 'default';
     const allSlots = generateSlotsForDate();
