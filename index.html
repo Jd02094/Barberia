@@ -141,10 +141,14 @@
     font-size:17px;
   }
   .theme-switch::before{
-    content:'';
+    content:'☀︎     ☾';
     position:relative;
     z-index:1;
     width:100%;
+    font-size:16px;
+    letter-spacing:3px;
+    color:#6b7280;
+    text-align:center;
   }
   .theme-switch svg{ display:none; }
   .theme-switch.is-dark::after{ content:'☾'; transform:translateX(38px); }
@@ -1476,7 +1480,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyxcsu0C79IQChJuXTpXQXrWFfYLxEuJlGdJeq3x1K0-ygQyHQPr-PyLUyIbUXgRwHarA/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwss_fZaVnvA_xbRbvCZqqipXL9DcH1_cGZOeTgjvda7JIIsotERMGVUMWej9jvywedXw/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -1645,9 +1649,7 @@
     }
     settingsStatus.innerHTML = '<span class="spinner"></span>Probando conexión...';
     try{
-      const res = await fetch(value, { method:'GET' });
-      if(!res.ok) throw new Error('El servidor respondió con error ' + res.status);
-      const data = await res.json();
+      const data = await jsonpRequestTo(value, {});
       if(!data || !data.config) throw new Error('La respuesta no tiene el formato esperado.');
       settingsStatus.innerHTML = '<span style="color:var(--ok)">✓ Conexión exitosa. Barbería encontrada: ' + (data.config.barberName || 'LA ESTACION - BARBERIA') + '.</span>';
     }catch(e){
@@ -1656,24 +1658,63 @@
   });
 
   // ---------- API helpers ----------
+  // IMPORTANTE: usamos JSONP (una etiqueta <script> que carga la URL) en vez de
+  // fetch() normal. Las Web Apps de Apps Script no agregan cabeceras CORS a sus
+  // respuestas, así que cuando esta página se aloja en un dominio distinto al de
+  // script.google.com (por ejemplo GitHub Pages), fetch() queda bloqueado por el
+  // navegador y siempre cae en el catch ("No pude consultar la agenda actual").
+  // JSONP no sufre ese bloqueo porque es una carga de <script>, no una petición
+  // XHR/fetch. El backend (doGet) ya sabe responder con ?callback=... — ver
+  // Code.gs. Como JSONP solo puede hacer GET, incluso las "escrituras"
+  // (addAppointment, saveConfig, etc.) se mandan como GET con la acción y el
+  // payload codificados en la URL; el servidor los procesa igual.
+  let jsonpCounter = 0;
+  function jsonpRequestTo(url, params, timeoutMs){
+    return new Promise((resolve, reject)=>{
+      const cbName = 'barbJsonp_' + (Date.now()) + '_' + (jsonpCounter++);
+      const script = document.createElement('script');
+      let settled = false;
+      const timer = setTimeout(()=>{
+        if(settled) return;
+        settled = true;
+        cleanup();
+        reject(new Error('Tiempo de espera agotado al conectar con el servidor.'));
+      }, timeoutMs || 15000);
+      function cleanup(){
+        clearTimeout(timer);
+        delete window[cbName];
+        if(script.parentNode) script.parentNode.removeChild(script);
+      }
+      window[cbName] = function(data){
+        if(settled) return;
+        settled = true;
+        cleanup();
+        resolve(data);
+      };
+      script.onerror = function(){
+        if(settled) return;
+        settled = true;
+        cleanup();
+        reject(new Error('No se pudo conectar con el servidor (revisá la URL configurada).'));
+      };
+      const qp = new URLSearchParams(params || {});
+      qp.set('callback', cbName);
+      const separator = url.indexOf('?') === -1 ? '?' : '&';
+      script.src = url + separator + qp.toString();
+      document.head.appendChild(script);
+    });
+  }
+  function jsonpRequest(params, timeoutMs){
+    return jsonpRequestTo(SHEETS_API_URL, params, timeoutMs);
+  }
+
   async function apiGet(){
     // Cada consulta debe leer el estado actual de la agenda, sin caché.
-    const separator = SHEETS_API_URL.includes('?') ? '&' : '?';
-    const res = await fetch(SHEETS_API_URL + separator + '_ts=' + Date.now(), {
-      method:'GET', cache:'no-store'
-    });
-    if(!res.ok) throw new Error('Error de red al leer datos');
-    return res.json();
+    return jsonpRequest({ _ts: Date.now() });
   }
   async function apiPost(action, payload){
     const fullPayload = Object.assign({}, payload, { token: barberToken });
-    const res = await fetch(SHEETS_API_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' }, // evita preflight CORS
-      body: JSON.stringify({ action, payload: fullPayload })
-    });
-    if(!res.ok) throw new Error('Error de red al guardar datos');
-    const data = await res.json();
+    const data = await jsonpRequest({ action: action, payload: JSON.stringify(fullPayload), _ts: Date.now() });
     if(!data.ok){
       if(data.error && data.error.indexOf('Sesión') !== -1){
         barberToken = '';
@@ -1690,12 +1731,7 @@
   // sesión firmado por el servidor (válido por unas horas); si no, devuelve null.
   // La clave en sí nunca se guarda ni se reenvía en cada acción.
   async function loginOnServer(candidate){
-    const res = await fetch(SHEETS_API_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action:'checkSecret', payload:{ secret: candidate } })
-    });
-    const data = await res.json();
+    const data = await jsonpRequest({ action:'checkSecret', payload: JSON.stringify({ secret: candidate }) });
     return data.ok ? data.token : null;
   }
 
@@ -2941,8 +2977,7 @@
       return;
     }
     try{
-      const res = await fetch(SHEETS_API_URL + '?action=getAppointment&id=' + encodeURIComponent(selfManageId) + '&token=' + encodeURIComponent(selfManageToken));
-      const data = await res.json();
+      const data = await jsonpRequest({ action:'getAppointment', id: selfManageId, token: selfManageToken });
       if(!data.ok){
         content.innerHTML = '<div class="msg err">' + (data.error || 'Turno no encontrado.') + '</div>';
         return;
