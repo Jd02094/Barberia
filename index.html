@@ -108,24 +108,53 @@
     position:relative;
     background:#fff;
   }
-  .settings-btn{
+  .theme-switch{
     position:absolute;
     top:20px;
     right:20px;
-    width:38px;
+    width:76px;
     height:38px;
-    border-radius:50%;
+    padding:3px;
+    border-radius:999px;
     border:1px solid var(--line);
     background:#fff;
     color:var(--ink);
     cursor:pointer;
     display:flex;
     align-items:center;
-    justify-content:center;
+    justify-content:space-between;
     transition:all .15s ease;
   }
-  .settings-btn:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
-  .settings-btn svg{ width:18px; height:18px; }
+  .theme-switch::after{
+    content:'☀︎';
+    position:absolute;
+    width:30px;
+    height:30px;
+    left:3px;
+    border-radius:50%;
+    background:var(--gold);
+    transition:transform .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff8df;
+    font-size:17px;
+  }
+  .theme-switch::before{
+    content:'☀︎     ☾';
+    position:relative;
+    z-index:1;
+    width:100%;
+    font-size:16px;
+    letter-spacing:3px;
+    color:#6b7280;
+    text-align:center;
+  }
+  .theme-switch svg{ display:none; }
+  .theme-switch.is-dark::after{ content:'☾'; transform:translateX(38px); }
+  .theme-switch .theme-icon{ position:relative; z-index:1; width:30px; text-align:center; font-size:16px; line-height:30px; }
+  .theme-switch .sun{ color:#7f5b11; }
+  .theme-switch .moon{ color:#6b7280; }
   header .eyebrow{
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
@@ -454,7 +483,7 @@
     .tabs{ padding:0 14px 12px; }
     #panel-peluquero{ padding:16px 14px 20px; }
     .ticket-stub{ width:76px; }
-    .settings-btn{ top:14px; right:14px; width:34px; height:34px; }
+    .theme-switch{ top:14px; right:14px; }
     .chat-app{ height:calc(100vh - 155px); min-height:400px; }
     .msg-row{ max-width:94%; }
   }
@@ -872,7 +901,7 @@
   }
 
   /* ===== Tema oscuro automático (según el sistema) para el chat del cliente ===== */
-  @media (prefers-color-scheme: dark){
+  @media (prefers-color-scheme: dark) and (min-width:99999px){
     body{ background:var(--chat-dark-bg-1); }
     .app{ background:var(--chat-dark-bg-2); box-shadow:none; }
     header{ background:var(--chat-dark-bg-2); }
@@ -1099,6 +1128,50 @@
     .modal-close:hover{ color:var(--chat-gold-text); }
   }
 
+  /* ===== Tema oscuro manual ===== */
+  body.theme-dark{ background:var(--chat-dark-bg-1); color:var(--chat-gold-text); }
+  body.theme-dark .app, body.theme-dark header, body.theme-dark .tabs{ background:var(--chat-dark-bg-2); }
+  body.theme-dark header h1{ color:var(--chat-gold-text); }
+  body.theme-dark header .eyebrow{ color:var(--chat-gold-strong); }
+  body.theme-dark header .sub{ color:rgba(231,197,129,.65); }
+  body.theme-dark .theme-switch{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); }
+  body.theme-dark .theme-switch .sun{ color:rgba(231,197,129,.45); }
+  body.theme-dark .theme-switch .moon{ color:var(--chat-gold-text); }
+  body.theme-dark .theme-switch::after{ background:var(--chat-gold-strong); }
+  body.theme-dark .tabs{ border-bottom-color:var(--chat-dark-border); }
+  body.theme-dark .tab, body.theme-dark .quick-chip, body.theme-dark .chat-text-widget, body.theme-dark .chat-widget input[type=date]{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
+  body.theme-dark .tab.active, body.theme-dark .quick-chip:hover{ background:var(--chat-gold-strong); border-color:var(--chat-gold-strong); color:#1c1409; }
+  body.theme-dark #panel-cliente{ background:var(--chat-dark-bg-2); }
+  body.theme-dark .chat-app{
+    background-image:
+      linear-gradient(180deg, rgba(20,15,9,.90) 0%, rgba(15,11,7,.94) 100%),
+      var(--bot-logo);
+    background-size:cover, 260% auto;
+    background-position:center, center 24%;
+    background-repeat:no-repeat, no-repeat;
+    background-color:var(--chat-dark-bg-1);
+  }
+  body.theme-dark #panel-peluquero{ background-color:var(--chat-dark-bg-1); }
+  body.theme-dark .msg-row.bot .msg-bubble,
+  body.theme-dark .msg-row.user .msg-bubble{
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(16px) saturate(160%);
+    -webkit-backdrop-filter:blur(16px) saturate(160%);
+    border-color:rgba(184,147,63,.5);
+    color:var(--ink);
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+  }
+  body.theme-dark .msg-row.bot .msg-avatar{ box-shadow:0 2px 10px rgba(0,0,0,.55); }
+  body.theme-dark .msg-row.user .msg-avatar{ background:var(--chat-gold-strong); color:#1c1409; }
+  body.theme-dark .chat-input-area{ background:rgba(23,17,10,.9); border-top-color:var(--chat-dark-border); }
+  body.theme-dark .card, body.theme-dark .modal, body.theme-dark #barberLock{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); box-shadow:0 1px 4px rgba(0,0,0,.4); }
+  body.theme-dark .card h2, body.theme-dark #barberLock h2, body.theme-dark .modal h3{ color:var(--chat-gold-text); }
+  body.theme-dark label, body.theme-dark .helper, body.theme-dark .modal .modal-desc{ color:rgba(231,197,129,.65); }
+  body.theme-dark input[type=text], body.theme-dark input[type=date], body.theme-dark input[type=number], body.theme-dark select{ background:rgba(0,0,0,.25); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
+  body.theme-dark .btn{ background:linear-gradient(135deg, var(--chat-gold-strong), #8a6a2c); color:#1c1409; }
+  body.theme-dark .btn.secondary{ background:transparent; border-color:var(--chat-gold-strong); color:var(--chat-gold-text); }
+  body.theme-dark .ticket, body.theme-dark .slot{ background:rgba(0,0,0,.25); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
+  body.theme-dark footer{ background:var(--chat-dark-bg-1); border-top-color:var(--chat-dark-border); color:rgba(231,197,129,.45); }
 </style>
 </head>
 <body>
@@ -1118,7 +1191,7 @@
 <div class="stripe"></div>
 <div class="app" id="mainApp">
   <header>
-    <button class="settings-btn" id="openSettingsBtn" aria-label="Configuración" title="Configuración">
+    <button class="theme-switch" id="themeToggle" aria-label="Activar tema oscuro" title="Cambiar tema">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
     <div class="eyebrow">RESERVA TU TURNO</div>
@@ -1506,7 +1579,20 @@
   }
   function closeSettings(){ overlay.classList.remove('open'); }
 
-  document.getElementById('openSettingsBtn').addEventListener('click', requestPinThenOpenSettings);
+  // Tema manual: se conserva en este navegador y no depende del tema del sistema.
+  const THEME_KEY = 'barbershop:theme';
+  const themeToggle = document.getElementById('themeToggle');
+  function applyTheme(theme){
+    const dark = theme === 'dark';
+    document.body.classList.toggle('theme-dark', dark);
+    themeToggle.classList.toggle('is-dark', dark);
+    themeToggle.setAttribute('aria-label', dark ? 'Activar tema claro' : 'Activar tema oscuro');
+    try{ localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); }catch(e){}
+  }
+  let savedTheme = 'light';
+  try{ savedTheme = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
+  applyTheme(savedTheme);
+  themeToggle.addEventListener('click', ()=>applyTheme(document.body.classList.contains('theme-dark') ? 'light' : 'dark'));
   document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
   overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeSettings(); });
   document.addEventListener('keydown', (e)=>{
@@ -1555,7 +1641,11 @@
 
   // ---------- API helpers ----------
   async function apiGet(){
-    const res = await fetch(SHEETS_API_URL, { method:'GET' });
+    // Cada consulta debe leer el estado actual de la agenda, sin caché.
+    const separator = SHEETS_API_URL.includes('?') ? '&' : '?';
+    const res = await fetch(SHEETS_API_URL + separator + '_ts=' + Date.now(), {
+      method:'GET', cache:'no-store'
+    });
     if(!res.ok) throw new Error('Error de red al leer datos');
     return res.json();
   }
@@ -1597,8 +1687,7 @@
     if(!apiReady) return;
     try{
       const data = await apiGet();
-      config = {...defaultConfig, ...(data.config||{})};
-      appointments = data.appointments || [];
+      applyServerData(data);
     }catch(e){
       console.error(e);
     }
@@ -1607,6 +1696,14 @@
     renderBarberConfig();
     renderAppointmentsList();
     renderBlockedList();
+  }
+
+  // La configuración que manda el servidor es la fuente de verdad. Así, si el
+  // barbero cambia horarios, duración, días o bloqueos, ningún navegador queda
+  // ofreciendo la configuración anterior mientras está abierto.
+  function applyServerData(data){
+    config = {...defaultConfig, ...(data.config||{})};
+    appointments = Array.isArray(data.appointments) ? data.appointments : [];
   }
 
   // ---------- barber: lock screen ----------
@@ -2072,14 +2169,26 @@
     const loadingMsg = addBotMessage('<span class="spinner"></span> Consultando horarios disponibles...');
     try{
       const fresh = await apiGet();
-      appointments = fresh.appointments || [];
+      applyServerData(fresh);
     }catch(e){
       // Si falla el refresco, seguimos con los datos que ya teníamos en memoria
       // en vez de bloquear al usuario; la validación final antes de confirmar
       // igual va a proteger contra choques de horario.
       console.error('No se pudo refrescar turnos: ' + e.message);
+      if(loadingMsg && loadingMsg.remove) loadingMsg.remove();
+      addBotMessage('No pude consultar la agenda actual. Probá de nuevo para ver horarios reales.');
+      addQuickReplies([{ label:'🔄 Reintentar', onClick: ()=>handleDatePick(dateStr) }]);
+      return;
     }
     if(loadingMsg && loadingMsg.remove) loadingMsg.remove();
+
+    // La configuración recién se leyó del servidor. Revalidamos la fecha por
+    // si el barbero modificó sus días u horarios mientras el chat estaba abierto.
+    if(!config.days.includes(dateToWeekday(dateStr)) || config.blocked.includes(dateStr)){
+      addBotMessage('Ese día ya no está disponible. Elegí otra fecha, por favor.');
+      askDate();
+      return;
+    }
 
     const staffId = chatBooking.staffId || selectedStaffId || 'default';
     const allSlots = generateSlotsForDate();
@@ -2110,10 +2219,10 @@
     }
 
     addBotMessage('Estos son los horarios disponibles para el <strong>' + formatDate(dateStr) + '</strong>:');
-    addQuickReplies(allSlots.map(t=>({
+    // No mostramos los horarios ocupados: el cliente solo puede elegir una hora libre.
+    addQuickReplies(freeSlots.map(t=>({
       label: t,
       value: t,
-      taken: takenTimes.includes(t),
       onPick: (v)=>{ chatBooking.time = v; selectedTime = v; askEmail(); }
     })));
   }
@@ -2195,7 +2304,7 @@
 
     try{
       const fresh = await apiGet();
-      appointments = fresh.appointments || [];
+      applyServerData(fresh);
       const stillFree = !appointments.some(a=>
         a.date===chatBooking.date && a.time===chatBooking.time && (a.staffId||'default')===staffId
       );
@@ -2496,8 +2605,11 @@
     const newConfig = { barberName:name, startHour:start, endHour:end, slotMin, days, cutTypes: workingCutTypes.slice(), staff, reminderHoursBefore, maxBookingsPerEmailPerDay, blocked: config.blocked, whatsappPhone };
     msgEl.innerHTML = '<div class="msg"><span class="spinner"></span>Guardando...</div>';
     try{
-      await apiPost('saveConfig', newConfig);
-      config = newConfig;
+      const saved = await apiPost('saveConfig', newConfig);
+      // Se usa la respuesta del servidor como confirmación del cambio; no se
+      // asume que el navegador guardó algo por sí solo.
+      config = {...defaultConfig, ...(saved.config || newConfig)};
+      await loadAll();
       msgEl.innerHTML = '<div class="msg ok">Configuración guardada. Cerrando sesión por seguridad…</div>';
       renderShopHeader();
       renderStaffOptions();
@@ -2650,8 +2762,9 @@
     rescheduleStatus.innerHTML = '';
 
     const allSlots = generateSlotsForDate();
+    const targetStaffId = rescheduleTarget.staffId || 'default';
     const takenTimes = appointments
-      .filter(a => a.id !== rescheduleTarget.id && a.date === dateStr)
+      .filter(a => a.id !== rescheduleTarget.id && a.date === dateStr && (a.staffId || 'default') === targetStaffId)
       .map(a => a.time);
 
     allSlots.forEach(t=>{
