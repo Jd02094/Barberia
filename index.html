@@ -222,7 +222,7 @@
     content:"";
     width:10px; height:10px;
     border-radius:50%;
-    background:linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
+    background:linear-gradient(135deg, var(--gold) 0%, var(--red) 100%);
     display:inline-block;
     flex-shrink:0;
   }
@@ -248,8 +248,8 @@
   }
   input[type=text]:focus, input[type=date]:focus, input[type=number]:focus, select:focus{
     outline:none;
-    border-color:#4285f4;
-    box-shadow:0 0 0 3px rgba(66,133,244,0.12);
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(184,147,63,0.15);
     background:#fff;
   }
   input:focus-visible, select:focus-visible, button:focus-visible{
@@ -318,8 +318,8 @@
     padding:13px 24px;
     border:none;
     border-radius:10px;
-    background:var(--red);
-    color:#fff;
+    background:linear-gradient(135deg, var(--gold), #8a6a2c);
+    color:#2b2008;
     font-family:'Work Sans', sans-serif;
     font-weight:700;
     font-size:14px;
@@ -327,14 +327,14 @@
     cursor:pointer;
     transition:background .15s ease, transform .12s ease;
   }
-  .btn:hover{ background:var(--red-light); transform:translateY(-1px); }
-  .btn:disabled{ background:#c9c2b2; cursor:not-allowed; transform:none; }
+  .btn:hover{ background:linear-gradient(135deg, #d9b76a, #a8843b); transform:translateY(-1px); }
+  .btn:disabled{ background:#c9c2b2; color:#8a8375; cursor:not-allowed; transform:none; }
   .btn.secondary{
     background:transparent;
-    border:1px solid var(--ink);
-    color:var(--ink);
+    border:1px solid var(--gold);
+    color:#8a6a2c;
   }
-  .btn.secondary:hover{ background:var(--ink); color:#fff; }
+  .btn.secondary:hover{ background:var(--gold); color:#fff; }
   .btn.small{ padding:7px 14px; font-size:12px; border-radius:8px; }
 
   .msg{
@@ -522,9 +522,9 @@
     text-align:center;
     padding:32px 26px 28px;
     border-radius:20px;
-    background:var(--chat-dark-panel);
-    border:1px solid var(--chat-dark-border);
-    box-shadow:0 8px 30px rgba(0,0,0,0.45);
+    background:var(--paper);
+    border:1px solid var(--line);
+    box-shadow:0 8px 30px rgba(30,42,56,0.12);
   }
   .lock-avatar{
     width:56px;
@@ -547,10 +547,10 @@
     margin:0 0 6px;
   }
   #barberLock h2::before{ display:none; }
-  #barberLock h2{ color:var(--chat-gold-text); }
+  #barberLock h2{ color:var(--ink); }
   #barberLock .lock-sub{
     font-size:13.5px;
-    color:rgba(231,197,129,0.65);
+    color:#5b6672;
     line-height:1.5;
     margin:0 0 22px;
   }
@@ -558,16 +558,16 @@
   #barberLock input[type=text]{
     border-radius:28px;
     padding:13px 18px;
-    background:rgba(0,0,0,0.3);
-    border:1px solid var(--chat-dark-border);
-    color:var(--chat-gold-text);
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    color:var(--ink);
     text-align:center;
   }
-  #barberLock input[type=text]::placeholder{ color:rgba(231,197,129,0.4); }
+  #barberLock input[type=text]::placeholder{ color:#8a9199; }
   #barberLock input[type=text]:focus{
-    background:rgba(0,0,0,0.4);
-    border-color:var(--chat-gold-strong);
-    box-shadow:0 0 0 3px var(--chat-gold-soft);
+    background:#fff;
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(184,147,63,0.18);
     text-align:left;
   }
   #barberLock .btn{
@@ -582,9 +582,9 @@
     background:linear-gradient(135deg, #d9b76a, #a8843b);
     transform:scale(1.015);
   }
-  #barberLock .msg.ok{ background:rgba(76,122,74,0.18); color:#9fd39b; border-color:rgba(76,122,74,0.4); }
-  #barberLock .msg.warn{ background:rgba(184,147,63,0.15); color:var(--chat-gold-text); border-color:var(--chat-dark-border); }
-  #barberLock .msg.err{ background:rgba(159,43,43,0.18); color:#ef9a92; border-color:rgba(159,43,43,0.4); }
+  #barberLock .msg.ok{ background:#e9f2e8; color:var(--ok); border:1px solid #b9d4b6; }
+  #barberLock .msg.warn{ background:#faf0dc; color:#8a6a1f; border:1px solid #e3c988; }
+  #barberLock .msg.err{ background:#fbe9e7; color:var(--red); border:1px solid #e6b3ab; }
 
   /* ===== Chatbot estilo Gemini ===== */
   .chat-app{
@@ -593,12 +593,12 @@
     height:calc(100vh - 168px);
     min-height:480px;
     background-image:
-      linear-gradient(180deg, rgba(248,249,252,0.93) 0%, rgba(238,241,248,0.96) 100%),
+      linear-gradient(180deg, rgba(248,246,240,0.93) 0%, rgba(233,225,206,0.96) 100%),
       var(--bot-logo);
     background-size: cover, 260% auto;
     background-position: center, center 24%;
     background-repeat: no-repeat, no-repeat;
-    background-color:#eef1f8;
+    background-color:var(--paper);
     border-radius:0;
     overflow:hidden;
     border:none;
@@ -709,10 +709,10 @@
   .chat-quick-replies:empty{ display:none; }
   .quick-chip{
     padding:9px 14px;
-    border:1px solid #c5d3f0;
+    border:1px solid #d9c48f;
     border-radius:20px;
-    background:#f0f4ff;
-    color:#1a3a6b;
+    background:var(--paper-dim);
+    color:#7a5e26;
     font-size:13px;
     font-family:'Work Sans', sans-serif;
     cursor:pointer;
@@ -720,8 +720,8 @@
     white-space:nowrap;
   }
   .quick-chip:hover{
-    background:#4285f4;
-    border-color:#4285f4;
+    background:var(--gold);
+    border-color:var(--gold);
     color:#fff;
   }
   .quick-chip.taken{
@@ -742,8 +742,8 @@
     max-width:320px;
   }
   .chat-text-widget:focus-within{
-    border-color:#4285f4;
-    box-shadow:0 0 0 3px rgba(66,133,244,0.12);
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(184,147,63,0.15);
   }
   .chat-text-widget input{
     flex:1;
@@ -763,7 +763,7 @@
     height:42px;
     border-radius:50%;
     border:none;
-    background:linear-gradient(135deg, #4285f4, #7b61c7);
+    background:linear-gradient(135deg, var(--gold), #8a6a2c);
     color:#fff;
     cursor:pointer;
     display:flex;
@@ -780,7 +780,7 @@
     height:38px;
     border-radius:50%;
     border:none;
-    background:linear-gradient(135deg, #4285f4, #7b61c7);
+    background:linear-gradient(135deg, var(--gold), #8a6a2c);
     color:#fff;
     cursor:pointer;
     display:flex;
@@ -822,7 +822,7 @@
     cursor:pointer;
     transition:all .12s ease;
   }
-  .chat-slot:hover{ border-color:#4285f4; background:#eef3ff; }
+  .chat-slot:hover{ border-color:var(--gold); background:var(--paper-dim); }
   .chat-slot.taken{
     text-decoration:line-through;
     opacity:.45;
@@ -1079,9 +1079,14 @@
     }
 
     /* Login del peluquero */
-    #barberLock input[type=text]{ background:rgba(0,0,0,0.3); }
+    #barberLock{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); box-shadow:0 8px 30px rgba(0,0,0,0.45); }
+    #barberLock input[type=text]{ background:rgba(0,0,0,0.3); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
+    #barberLock input[type=text]:focus{ background:rgba(0,0,0,0.4); border-color:var(--chat-gold-strong); box-shadow:0 0 0 3px var(--chat-gold-soft); }
     #barberLock .lock-sub{ color:rgba(231,197,129,0.55); }
     #barberLock h2{ color:var(--chat-gold-text); }
+    #barberLock .msg.ok{ background:rgba(76,122,74,0.18); color:#9fd39b; border-color:rgba(76,122,74,0.4); }
+    #barberLock .msg.warn{ background:rgba(184,147,63,0.15); color:var(--chat-gold-text); border-color:var(--chat-dark-border); }
+    #barberLock .msg.err{ background:rgba(159,43,43,0.18); color:#ef9a92; border-color:rgba(159,43,43,0.4); }
 
     /* Modales (pin, configuración, reprogramar, confirmar) */
     .modal{
