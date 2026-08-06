@@ -1474,7 +1474,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbz8SRrRy8Juw5L6FBLIUbE5yCB57OcJ9W9vcOxzeAk0rKmZXeIdO4rLfidDDq_Go2GT/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwJ6FhiIbCQKg_UdReUWw9k2mZYmz6JHBY25d8TkemYhkHxeEBVBl5Dyr9o0-6ECkdAnA/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -1640,24 +1640,32 @@
   });
 
   // ---------- API helpers ----------
-  async function apiGet(){
-    // Cada consulta debe leer el estado actual de la agenda, sin caché.
-    const separator = SHEETS_API_URL.includes('?') ? '&' : '?';
-    const res = await fetch(SHEETS_API_URL + separator + '_ts=' + Date.now(), {
-      method:'GET', cache:'no-store'
+  let jsonpSequence = 0;
+  function jsonpRequest(params){
+    return new Promise((resolve, reject)=>{
+      const callback = 'barbershopJsonp' + Date.now() + '_' + (++jsonpSequence);
+      const query = new URLSearchParams(Object.assign({}, params, { callback })).toString();
+      const script = document.createElement('script');
+      const separator = SHEETS_API_URL.includes('?') ? '&' : '?';
+      let timeout;
+      function cleanup(){
+        clearTimeout(timeout);
+        delete window[callback];
+        if(script.parentNode) script.parentNode.removeChild(script);
+      }
+      window[callback] = (data)=>{ cleanup(); resolve(data); };
+      script.onerror = ()=>{ cleanup(); reject(new Error('No se pudo conectar con la agenda.')); };
+      timeout = setTimeout(()=>{ cleanup(); reject(new Error('La agenda tardó demasiado en responder.')); }, 15000);
+      script.src = SHEETS_API_URL + separator + query;
+      document.head.appendChild(script);
     });
-    if(!res.ok) throw new Error('Error de red al leer datos');
-    return res.json();
+  }
+  async function apiGet(){
+    return jsonpRequest({});
   }
   async function apiPost(action, payload){
     const fullPayload = Object.assign({}, payload, { token: barberToken });
-    const res = await fetch(SHEETS_API_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' }, // evita preflight CORS
-      body: JSON.stringify({ action, payload: fullPayload })
-    });
-    if(!res.ok) throw new Error('Error de red al guardar datos');
-    const data = await res.json();
+    const data = await jsonpRequest({ action, payload: JSON.stringify(fullPayload) });
     if(!data.ok){
       if(data.error && data.error.indexOf('Sesión') !== -1){
         barberToken = '';
@@ -1674,12 +1682,7 @@
   // sesión firmado por el servidor (válido por unas horas); si no, devuelve null.
   // La clave en sí nunca se guarda ni se reenvía en cada acción.
   async function loginOnServer(candidate){
-    const res = await fetch(SHEETS_API_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action:'checkSecret', payload:{ secret: candidate } })
-    });
-    const data = await res.json();
+    const data = await jsonpRequest({ action:'checkSecret', payload:JSON.stringify({ secret:candidate }) });
     return data.ok ? data.token : null;
   }
 
@@ -2925,8 +2928,7 @@
       return;
     }
     try{
-      const res = await fetch(SHEETS_API_URL + '?action=getAppointment&id=' + encodeURIComponent(selfManageId) + '&token=' + encodeURIComponent(selfManageToken));
-      const data = await res.json();
+      const data = await jsonpRequest({ action:'getAppointment', id:selfManageId, token:selfManageToken });
       if(!data.ok){
         content.innerHTML = '<div class="msg err">' + (data.error || 'Turno no encontrado.') + '</div>';
         return;
