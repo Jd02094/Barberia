@@ -1604,8 +1604,9 @@
 
   // Token de sesión del barbero (nunca guardamos la clave secreta en sí, solo este
   // token firmado por el servidor que expira solo a las pocas horas).
+  // La sesión del barbero NO se restaura al cargar: siempre pide la clave.
   let barberToken = '';
-  try{ barberToken = localStorage.getItem(TOKEN_KEY) || ''; }catch(e){ barberToken = ''; }
+  try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
 
   // ---------- enlace de autogestión del cliente (?apt=ID&token=XXXX) ----------
   let selfManageId = null, selfManageToken = null, selfManageMode = false;
@@ -2056,8 +2057,8 @@
     try{
       const token = await loginOnServer(attempt);
       if(token){
-        barberToken = token;
-        try{ localStorage.setItem(TOKEN_KEY, token); }catch(e){}
+        barberToken = token; // solo en memoria: al recargar la página hay que volver a ingresar la clave
+        try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
         showBarberContent();
       }else{
         msgEl.innerHTML = '<div class="msg err">Clave incorrecta.</div>';
@@ -2072,14 +2073,6 @@
     if(e.key === 'Enter') tryUnlock();
   });
 
-  // si ya había un token de sesión guardado en este navegador, mostrar directo (el
-  // servidor lo rechazará solo si expiró, y ahí volvemos a pedir la clave)
-  function autoUnlockIfPossible(){
-    if(!barberToken || !apiReady) return;
-    showBarberContent();
-    loadStats();
-  }
-
   // ---------- tabs ----------
   document.querySelectorAll('.tab').forEach(tab=>{
     tab.addEventListener('click', ()=>{
@@ -2088,7 +2081,17 @@
       tab.classList.add('active');
       document.getElementById('panel-'+tab.dataset.view).classList.add('active');
       if(tab.dataset.view === 'barbero'){
-        if(barberToken){ autoUnlockIfPossible(); } else { showBarberLock(); }
+        // Siempre mostrar candado al entrar a la pestaña, salvo que YA haya
+        // desbloqueado con la clave en ESTA visita (barberToken en memoria).
+        if(barberToken){
+          showBarberContent();
+        }else{
+          showBarberLock();
+          var inp = document.getElementById('barberSecretInput');
+          if(inp){ inp.value = ''; }
+          var msg = document.getElementById('unlockMsg');
+          if(msg) msg.innerHTML = '';
+        }
       }
     });
   });
@@ -3366,6 +3369,9 @@
       content.innerHTML = '<div class="msg err">No se pudo cargar tu turno.</div>';
     }
   }
+
+  // Panel barbero siempre cerrado al cargar
+  try{ showBarberLock(); }catch(e){}
 
   if(selfManageId && selfManageToken){
     loadAll({ force: true }).then(initSelfManage).catch(function(e){
