@@ -1353,7 +1353,13 @@
             <input type="number" id="maxBookingsPerEmailPerDay" min="1" max="20" value="3">
           </div>
         </div>
-        <div class="helper" style="margin-bottom:14px;">Para que los recordatorios se envíen solos todos los días, hace falta activar el disparador una vez desde el editor de Apps Script (función <code>instalarRecordatorios</code>). Ver instrucciones al inicio de Code.gs.</div>
+        <div class="helper" style="margin-bottom:14px;">
+          <strong>Notificaciones push al cliente</strong><br>
+          1. En Apps Script ejecutá una vez <code>instalarRecordatorios</code> (▶ Ejecutar).<br>
+          2. El sistema avisa por <strong>email</strong> y por <strong>WhatsApp</strong> (si la API está configurada) X horas antes del turno.<br>
+          3. El archivo de calendario (.ics) también programa una alarma en el teléfono del cliente.<br>
+          Para desactivar: ejecutá <code>desinstalarRecordatorios</code>.
+        </div>
 
         <div class="field">
           <label for="whatsappPhoneInput">WhatsApp de la barbería</label>
@@ -1528,7 +1534,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwoAjTpEk3WVm69QEQeRFyYyxBgryRUZvLjLflsmXnZXJQ73hZWjrZP17mJH5zh3P1DfA/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwYxx9Gw-5qjyZXXgZNReRVYMYCtvlIZ8QmBeQb2uS79EF5QTpPwZQCl4oDvU4pbIlxSA/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -2492,6 +2498,14 @@
         'N.° <strong>' + result.appointment.id + '</strong><br><br>' +
         'Te llegará un correo con la confirmación y el enlace para gestionar tu turno.'
       );
+      ensureNotificationPermission().then(function(ok){
+        if(!ok) return;
+        showLocalPush(
+          'Turno confirmado — ' + (config.barberName || 'Barbería'),
+          formatDate(chatBooking.date) + ' a las ' + chatBooking.time + ' · ' + (chatBooking.cut || ''),
+          'turno-' + result.appointment.id
+        );
+      });
       renderAppointmentsList();
       const confirmedApt = {
         id: result.appointment.id,
@@ -2591,6 +2605,29 @@
       cur += config.slotMin;
     }
     return slots;
+  }
+
+  // ---------- Notificaciones del navegador (push local) ----------
+  async function ensureNotificationPermission(){
+    if(!('Notification' in window)) return false;
+    if(Notification.permission === 'granted') return true;
+    if(Notification.permission === 'denied') return false;
+    try{
+      const r = await Notification.requestPermission();
+      return r === 'granted';
+    }catch(e){ return false; }
+  }
+
+  function showLocalPush(title, body, tag){
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    try{
+      const n = new Notification(title, {
+        body: body || '',
+        tag: tag || 'barberia-turno',
+        requireInteraction: false
+      });
+      setTimeout(function(){ try{ n.close(); }catch(e){} }, 12000);
+    }catch(e){ console.warn('Notification error', e); }
   }
 
   function renderClientDateAvailability(){ /* chatbot gestiona disponibilidad en conversación */ }
