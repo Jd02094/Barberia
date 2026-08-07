@@ -108,53 +108,6 @@
     position:relative;
     background:#fff;
   }
-  .theme-switch{
-    position:absolute;
-    top:20px;
-    right:20px;
-    width:76px;
-    height:38px;
-    padding:3px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    background:#fff;
-    color:var(--ink);
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    transition:all .15s ease;
-  }
-  .theme-switch::after{
-    content:'☀︎';
-    position:absolute;
-    width:30px;
-    height:30px;
-    left:3px;
-    border-radius:50%;
-    background:var(--gold);
-    transition:transform .2s ease;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff8df;
-    font-size:17px;
-  }
-  .theme-switch::before{
-    content:'☀︎     ☾';
-    position:relative;
-    z-index:1;
-    width:100%;
-    font-size:16px;
-    letter-spacing:3px;
-    color:#6b7280;
-    text-align:center;
-  }
-  .theme-switch svg{ display:none; }
-  .theme-switch.is-dark::after{ content:'☾'; transform:translateX(38px); }
-  .theme-switch .theme-icon{ position:relative; z-index:1; width:30px; text-align:center; font-size:16px; line-height:30px; }
-  .theme-switch .sun{ color:#7f5b11; }
-  .theme-switch .moon{ color:#6b7280; }
   .cache-reload-btn{
     position:absolute;
     top:20px;
@@ -527,7 +480,6 @@
     .tabs{ padding:0 14px 12px; }
     #panel-peluquero{ padding:16px 14px 20px; }
     .ticket-stub{ width:76px; }
-    .theme-switch{ top:14px; right:14px; }
     .cache-reload-btn{ top:14px; left:14px; }
     .dev-access-dot{ top:14px; left:58px; width:34px; height:34px; }
     .chat-app{ height:calc(100vh - 155px); min-height:400px; }
@@ -1182,10 +1134,6 @@
   body.theme-dark header .sub{ color:rgba(231,197,129,.65); }
   body.theme-dark .cache-reload-btn{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
   body.theme-dark .dev-access-dot{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
-  body.theme-dark .theme-switch{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); }
-  body.theme-dark .theme-switch .sun{ color:rgba(231,197,129,.45); }
-  body.theme-dark .theme-switch .moon{ color:var(--chat-gold-text); }
-  body.theme-dark .theme-switch::after{ background:var(--chat-gold-strong); }
   body.theme-dark .tabs{ border-bottom-color:var(--chat-dark-border); }
   body.theme-dark .tab, body.theme-dark .quick-chip, body.theme-dark .chat-text-widget, body.theme-dark .chat-widget input[type=date]{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
   body.theme-dark .tab.active, body.theme-dark .quick-chip:hover{ background:var(--chat-gold-strong); border-color:var(--chat-gold-strong); color:#1c1409; }
@@ -1243,9 +1191,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
     </button>
     <button class="dev-access-dot" id="devAccessBtn" aria-label="Configuración técnica" title="Configuración técnica">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-    </button>
-    <button class="theme-switch" id="themeToggle" aria-label="Activar tema oscuro" title="Cambiar tema">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
     <div class="eyebrow">RESERVA TU TURNO</div>
@@ -1555,10 +1500,21 @@
   let selectedStaffId = null;
   let refreshTimer = null;
 
-  // La URL se guarda en el navegador (localStorage) al configurarla desde el botón de ajustes.
-  // Si tu navegador la bloquea (poco común), queda solo en memoria durante esta sesión.
+  // La URL se guarda en el navegador (localStorage) al configurarla desde el botón de ajustes,
+  // pero SIEMPRE que el código traiga una URL fija (DEFAULT_SHEETS_API_URL) esa es la que manda:
+  // así, apenas la pegás/actualizás acá arriba, todos los navegadores (incluido el tuyo) se
+  // conectan solos, sin tener que entrar a Configuración a pegarla ni a darle "Probar conexión".
+  // Si en algún momento dejás DEFAULT_SHEETS_API_URL vacío, ahí sí se respeta lo que haya
+  // guardado en este navegador (para poder seguir usando el botón ⚙ manualmente).
   let SHEETS_API_URL = '';
-  try{ SHEETS_API_URL = localStorage.getItem(STORAGE_KEY) || DEFAULT_SHEETS_API_URL || ''; }catch(e){ SHEETS_API_URL = DEFAULT_SHEETS_API_URL || ''; }
+  try{
+    if(DEFAULT_SHEETS_API_URL){
+      SHEETS_API_URL = DEFAULT_SHEETS_API_URL;
+      localStorage.setItem(STORAGE_KEY, DEFAULT_SHEETS_API_URL); // mantiene sincronizado lo guardado, por si se abre Configuración
+    }else{
+      SHEETS_API_URL = localStorage.getItem(STORAGE_KEY) || '';
+    }
+  }catch(e){ SHEETS_API_URL = DEFAULT_SHEETS_API_URL || ''; }
 
   let apiReady = SHEETS_API_URL && SHEETS_API_URL.indexOf('http') === 0;
 
@@ -1658,20 +1614,8 @@
   }
   function closeSettings(){ overlay.classList.remove('open'); }
 
-  // Tema manual: se conserva en este navegador y no depende del tema del sistema.
-  const THEME_KEY = 'barbershop:theme';
-  const themeToggle = document.getElementById('themeToggle');
-  function applyTheme(theme){
-    const dark = theme === 'dark';
-    document.body.classList.toggle('theme-dark', dark);
-    themeToggle.classList.toggle('is-dark', dark);
-    themeToggle.setAttribute('aria-label', dark ? 'Activar tema claro' : 'Activar tema oscuro');
-    try{ localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); }catch(e){}
-  }
-  let savedTheme = 'light';
-  try{ savedTheme = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
-  applyTheme(savedTheme);
-  themeToggle.addEventListener('click', ()=>applyTheme(document.body.classList.contains('theme-dark') ? 'light' : 'dark'));
+  // Se sacó el botón de tema oscuro (sol/luna); la app queda siempre en tema claro.
+  document.body.classList.remove('theme-dark');
 
   // ---------- Borrar caché y recargar ----------
   // Limpia Cache Storage y cualquier Service Worker registrado (si los hubiera),
