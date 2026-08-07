@@ -1531,7 +1531,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwoAjTpEk3WVm69QEQeRFyYyxBgryRUZvLjLflsmXnZXJQ73hZWjrZP17mJH5zh3P1DfA/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbx3zY8lcnbgHVh8F5HC_SUQsOtywQULzsHEaBwCnBiaKcKDaUHp9L1CuBWHxVKj-jQGBQ/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -1825,11 +1825,14 @@
 
   async function loadAll(){
     if(!apiReady) return;
+    setConnectionStatus('checking');
     try{
       const data = await apiGet();
       applyServerData(data);
+      setConnectionStatus('online');
     }catch(e){
       console.error(e);
+      setConnectionStatus('offline', e && e.message ? e.message : '');
     }
     renderShopHeader();
     renderStaffOptions();
@@ -2335,6 +2338,15 @@
     const takenTimes = appointments
       .filter(a=>a.date===dateStr && (a.staffId||'default')===staffId)
       .map(a=>a.time);
+
+    // DIAGNÓSTICO: dejá esto un tiempo para poder revisar en la consola del
+    // navegador (F12 → Console) qué turnos llegaron del servidor justo antes
+    // de mostrar los horarios, y confirmar si el turno "ocupado" que esperás
+    // ver excluido realmente está en la lista con la fecha/hora/peluquero
+    // exactos.
+    console.log('[chat] fecha consultada:', dateStr, 'staffId:', staffId);
+    console.log('[chat] total appointments recibidos:', appointments.length, appointments);
+    console.log('[chat] horarios ya tomados detectados:', takenTimes);
 
     if(allSlots.length === 0){
       addBotMessage('No hay horarios disponibles configurados. Contactá al peluquero.');
