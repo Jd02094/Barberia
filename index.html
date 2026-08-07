@@ -1296,7 +1296,9 @@
 
         <label>Días de atención <span class="required-mark">*</span></label>
         <div class="days-grid" id="daysGrid"></div>
-        <div class="helper" style="margin-top:8px;margin-bottom:6px;">Horario de cada día (inicio – fin). El cliente solo ve turnos dentro de estos rangos.</div>
+        <div class="helper" style="margin-top:8px;margin-bottom:4px;">Tocá los días para abrir o cerrar. <strong>Se guarda al instante</strong> en Sheets (hoja Config).</div>
+        <div id="daysSaveStatus" class="helper" style="margin-bottom:8px;min-height:18px;"></div>
+        <div class="helper" style="margin-top:4px;margin-bottom:6px;">Horario de cada día activo (inicio – fin). El cliente solo ve turnos dentro de estos rangos.</div>
         <div id="dayHoursEditor" style="display:grid;gap:8px;margin-bottom:14px;"></div>
 
         <div class="field">
@@ -1538,7 +1540,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxt0Hqlhpx-wib4FMl23-YZZqLFaY9827rStXt6yWlTzRaa-QOBi2S_uFxDuShBO7Dk0g/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzK0FsW55nuzxqUWBdUiUFEy5OzIX4pJSWidkejQ4ZpHnXIji3fJbzLzvOg3jF6DAkdbg/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION - BARBERIA',
@@ -2874,9 +2876,72 @@
     chip.addEventListener('click', ()=>{
       chip.classList.toggle('on');
       renderDayHoursEditor();
+      // Guardado inmediato de días + horarios en Sheets
+      saveDaysScheduleNow();
     });
     daysGrid.appendChild(chip);
   });
+
+  let daysSaveTimer = null;
+  async function saveDaysScheduleNow(){
+    if(!barberToken || !apiReady){
+      var st = document.getElementById('daysSaveStatus');
+      if(st) st.innerHTML = '<span style="color:#a33;">Desbloqueá el panel para guardar los días.</span>';
+      return;
+    }
+    const days = Array.from(document.querySelectorAll('.day-chip.on')).map(c=>Number(c.dataset.day));
+    if(days.length === 0){
+      var st0 = document.getElementById('daysSaveStatus');
+      if(st0) st0.innerHTML = '<span style="color:#a33;">Elegí al menos un día.</span>';
+      return;
+    }
+    // Debounce 400ms por si toca varios chips seguidos
+    if(daysSaveTimer) clearTimeout(daysSaveTimer);
+    var statusEl = document.getElementById('daysSaveStatus');
+    if(statusEl) statusEl.innerHTML = '<span class="spinner"></span> Guardando días…';
+    daysSaveTimer = setTimeout(async function(){
+      var statusEl2 = document.getElementById('daysSaveStatus');
+      try{
+        var dayHours = collectDayHoursFromEditor();
+        Object.keys(config.dayHours || {}).forEach(function(k){
+          if(!dayHours[k]) dayHours[k] = config.dayHours[k];
+        });
+        days.forEach(function(d){
+          var k = String(d);
+          if(!dayHours[k]){
+            dayHours[k] = { start: Number(config.startHour)||8, end: Number(config.endHour)||18 };
+          }
+        });
+        var minStart = 24, maxEnd = 0;
+        days.forEach(function(d){
+          var h = dayHours[String(d)];
+          if(h){ if(h.start < minStart) minStart = h.start; if(h.end > maxEnd) maxEnd = h.end; }
+        });
+        if(minStart >= maxEnd){ minStart = 8; maxEnd = 18; }
+        var payload = {
+          barberName: config.barberName,
+          startHour: minStart,
+          endHour: maxEnd,
+          slotMin: config.slotMin || 60,
+          days: days,
+          dayHours: dayHours,
+          cutTypes: config.cutTypes,
+          staff: config.staff,
+          reminderHoursBefore: config.reminderHoursBefore || 24,
+          maxBookingsPerEmailPerDay: config.maxBookingsPerEmailPerDay || 3,
+          blocked: config.blocked || [],
+          whatsappPhone: config.whatsappPhone || ''
+        };
+        var saved = await apiPost('saveConfig', payload);
+        config = Object.assign({}, defaultConfig, saved.config || payload);
+        if(statusEl2) statusEl2.innerHTML = '<span style="color:#2a7a3a;">✓ Días guardados en Sheets</span>';
+        markAgendaStale();
+      }catch(e){
+        console.error(e);
+        if(statusEl2) statusEl2.innerHTML = '<span style="color:#a33;">No se pudo guardar: ' + (e.message||'') + '</span>';
+      }
+    }, 400);
+  }
 
   function renderDayHoursEditor(){
     const box = document.getElementById('dayHoursEditor');
@@ -2894,13 +2959,15 @@
       const h = (config.dayHours && config.dayHours[String(d)])
         ? config.dayHours[String(d)]
         : { start: config.startHour || 8, end: config.endHour || 18 };
-      // Prefer values already typed in inputs if present
       return '<div class="row" style="align-items:center;gap:8px;">' +
         '<div class="field" style="min-width:90px;flex:0 0 auto;"><strong>' + DIAS_LARGO[d] + '</strong></div>' +
         '<div class="field"><label>Desde</label><input type="number" class="day-hour-start" data-day="'+d+'" min="0" max="23" value="'+h.start+'"></div>' +
         '<div class="field"><label>Hasta</label><input type="number" class="day-hour-end" data-day="'+d+'" min="1" max="24" value="'+h.end+'"></div>' +
         '</div>';
     }).join('');
+    box.querySelectorAll('.day-hour-start, .day-hour-end').forEach(function(inp){
+      inp.addEventListener('change', function(){ saveDaysScheduleNow(); });
+    });
   }
 
   function collectDayHoursFromEditor(){
