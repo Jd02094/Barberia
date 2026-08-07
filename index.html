@@ -1538,7 +1538,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyWpary7U6Lw2n5gjXTkQ1FZlV4SRzIeC-CiolW0zodxqMV_r12da0Xl-AT1QqNpE436A/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzFufQ6QQcirOJEwxDlLPd6ZmMKq8QzypoEU_kkZv4Wcks74OjHuKgx8mc1s-2mGsauhg/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION - BARBERIA',
@@ -2613,7 +2613,14 @@
     ]);
   }
 
+  let bookingInProgress = false;
   async function confirmBookingFromChat(){
+    // Evita doble clic / doble envío del mismo turno
+    if(bookingInProgress){
+      addBotMessage('Ya estamos confirmando tu turno, esperá un momento…');
+      return;
+    }
+    bookingInProgress = true;
     chatStep = 'booking';
     clearQuickReplies();
     addBotMessage('<span class="spinner"></span> Confirmando tu turno...');
@@ -2622,7 +2629,6 @@
 
     try{
       // Siempre datos frescos del servidor antes de confirmar (anti doble-turno).
-      // forceFresh evita usar el snapshot de 8s del front.
       const fresh = await apiGet({ forceFresh: true, timeoutMs: JSONP_TIMEOUT_MS });
       applyServerData(fresh);
       const stillFree = !appointments.some(a=>
@@ -2683,6 +2689,7 @@
       addQuickReplies(postBookReplies);
       resetChatBooking();
       chatStep = 'done';
+      bookingInProgress = false;
     }catch(e){
       const msg = e.message || '';
       if(msg.indexOf('ya fue reservado') !== -1){
@@ -2699,6 +2706,8 @@
         { label:'🔄 Reintentar', onClick: askConfirm },
         { label:'↩ Volver al inicio', onClick: showWelcome }
       ]);
+    }finally{
+      bookingInProgress = false;
     }
   }
 
