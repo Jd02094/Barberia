@@ -108,6 +108,52 @@
     position:relative;
     background:#fff;
   }
+  .theme-switch{
+    position:absolute;
+    top:20px;
+    right:20px;
+    width:76px;
+    height:38px;
+    padding:3px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    display:block;
+    transition:all .15s ease;
+  }
+  .theme-switch::after{
+    content:'☀︎';
+    position:absolute;
+    width:30px;
+    height:30px;
+    left:3px;
+    top:3px;
+    border-radius:50%;
+    background:var(--gold);
+    transition:transform .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff8df;
+    font-size:17px;
+    z-index:1;
+  }
+  /* Ícono estático del lado OPUESTO al círculo, para que nunca se solapen entre sí */
+  .theme-switch::before{
+    content:'☾';
+    position:absolute;
+    right:11px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:15px;
+    color:#6b7280;
+    z-index:0;
+  }
+  .theme-switch svg{ display:none; }
+  .theme-switch.is-dark::after{ content:'☾'; transform:translateX(38px); }
+  .theme-switch.is-dark::before{ content:'☀︎'; right:auto; left:11px; color:#7f5b11; }
   .cache-reload-btn{
     position:absolute;
     top:20px;
@@ -481,6 +527,7 @@
     #panel-peluquero{ padding:16px 14px 20px; }
     .ticket-stub{ width:76px; }
     .cache-reload-btn{ top:14px; left:14px; }
+    .theme-switch{ top:14px; right:14px; }
     .dev-access-dot{ top:14px; left:58px; width:34px; height:34px; }
     .chat-app{ height:calc(100vh - 155px); min-height:400px; }
     .msg-row{ max-width:94%; }
@@ -1133,6 +1180,10 @@
   body.theme-dark header .eyebrow{ color:var(--chat-gold-strong); }
   body.theme-dark header .sub{ color:rgba(231,197,129,.65); }
   body.theme-dark .cache-reload-btn{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
+  body.theme-dark .theme-switch{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); }
+  body.theme-dark .theme-switch::after{ background:var(--chat-gold-strong); }
+  body.theme-dark .theme-switch::before{ color:rgba(231,197,129,.45); }
+  body.theme-dark .theme-switch.is-dark::before{ color:var(--chat-gold-text); }
   body.theme-dark .dev-access-dot{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
   body.theme-dark .tabs{ border-bottom-color:var(--chat-dark-border); }
   body.theme-dark .tab, body.theme-dark .quick-chip, body.theme-dark .chat-text-widget, body.theme-dark .chat-widget input[type=date]{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
@@ -1193,6 +1244,7 @@
     <button class="dev-access-dot" id="devAccessBtn" aria-label="Configuración técnica" title="Configuración técnica">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
+    <button class="theme-switch" id="themeToggle" aria-label="Activar tema oscuro" title="Cambiar tema"></button>
     <div class="eyebrow">RESERVA TU TURNO</div>
     <h1 id="shopTitle">LA ESTACION - BARBERIA</h1>
     <div class="sub" id="shopSub">Aca Podras Agendar tu turno</div>
@@ -1614,8 +1666,20 @@
   }
   function closeSettings(){ overlay.classList.remove('open'); }
 
-  // Se sacó el botón de tema oscuro (sol/luna); la app queda siempre en tema claro.
-  document.body.classList.remove('theme-dark');
+  // Tema manual: se conserva en este navegador y no depende del tema del sistema.
+  const THEME_KEY = 'barbershop:theme';
+  const themeToggle = document.getElementById('themeToggle');
+  function applyTheme(theme){
+    const dark = theme === 'dark';
+    document.body.classList.toggle('theme-dark', dark);
+    themeToggle.classList.toggle('is-dark', dark);
+    themeToggle.setAttribute('aria-label', dark ? 'Activar tema claro' : 'Activar tema oscuro');
+    try{ localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); }catch(e){}
+  }
+  let savedTheme = 'light';
+  try{ savedTheme = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
+  applyTheme(savedTheme);
+  themeToggle.addEventListener('click', ()=>applyTheme(document.body.classList.contains('theme-dark') ? 'light' : 'dark'));
 
   // ---------- Borrar caché y recargar ----------
   // Limpia Cache Storage y cualquier Service Worker registrado (si los hubiera),
