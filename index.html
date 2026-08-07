@@ -230,7 +230,7 @@
   }
   .tab:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
   main{ padding:0; }
-  #panel-Barbero{
+  #panel-barbero{
     padding:24px 20px 28px;
     background-image:
       linear-gradient(180deg, rgba(20,15,9,0.90) 0%, rgba(15,11,7,0.94) 100%),
@@ -524,7 +524,7 @@
     header{ padding:22px 16px 12px; }
     .tab{ font-size:12px; padding:8px 16px; }
     .tabs{ padding:0 14px 12px; }
-    #panel-Barbero{ padding:16px 14px 20px; }
+    #panel-barbero{ padding:16px 14px 20px; }
     .ticket-stub{ width:76px; }
     .cache-reload-btn{ top:14px; left:14px; }
     .theme-switch{ top:14px; right:14px; }
@@ -589,7 +589,7 @@
   }
   .modal{ position:relative; }
 
-  /* ===== Acceso del Barbero (mismo lenguaje visual que el chat) ===== */
+  /* ===== Acceso del barbero (mismo lenguaje visual que el chat) ===== */
   #barberLock{
     max-width:400px;
     margin:32px auto 0;
@@ -1047,8 +1047,8 @@
     }
     .wa-banner a{ color:var(--chat-gold-strong); }
 
-    /* ---- Panel del Barbero: mismo lenguaje visual dorado/oscuro ---- */
-    #panel-Barbero{
+    /* ---- Panel del barbero: mismo lenguaje visual dorado/oscuro ---- */
+    #panel-barbero{
       background:linear-gradient(180deg, var(--chat-dark-bg-2) 0%, var(--chat-dark-bg-1) 100%);
     }
     .card{
@@ -1152,7 +1152,7 @@
       color:rgba(231,197,129,0.4);
     }
 
-    /* Login del Barbero */
+    /* Login del barbero */
     #barberLock{ background:var(--chat-dark-panel); border-color:var(--chat-dark-border); box-shadow:0 8px 30px rgba(0,0,0,0.45); }
     #barberLock input[type=text]{ background:rgba(0,0,0,0.3); border-color:var(--chat-dark-border); color:var(--chat-gold-text); }
     #barberLock input[type=text]:focus{ background:rgba(0,0,0,0.4); border-color:var(--chat-gold-strong); box-shadow:0 0 0 3px var(--chat-gold-soft); }
@@ -1198,7 +1198,7 @@
     background-repeat:no-repeat, no-repeat;
     background-color:var(--chat-dark-bg-1);
   }
-  body.theme-dark #panel-Barbero{ background-color:var(--chat-dark-bg-1); }
+  body.theme-dark #panel-barbero{ background-color:var(--chat-dark-bg-1); }
   body.theme-dark .msg-row.bot .msg-bubble,
   body.theme-dark .msg-row.user .msg-bubble{
     background:rgba(255,255,255,.85);
@@ -1252,7 +1252,7 @@
 
   <nav class="tabs">
     <button class="tab active" data-view="cliente">Soy cliente</button>
-    <button class="tab" data-view="Barbero">Soy el Barbero</button>
+    <button class="tab" data-view="barbero">Soy el barbero</button>
   </nav>
 
   <main>
@@ -1269,16 +1269,16 @@
       </div>
     </section>
 
-    <!-- ===================== VISTA Barbero ===================== -->
-    <section class="panel" id="panel-Barbero">
+    <!-- ===================== VISTA BARBERO ===================== -->
+    <section class="panel" id="panel-barbero">
       <div class="card" id="barberLock">
         <div class="lock-avatar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
         <h2>Acceso del equipo</h2>
-        <p class="lock-sub">Esta sección es solo para el Barbero.<br>Ingresá tu clave para abrir el panel.</p>
+        <p class="lock-sub">Esta sección es solo para el barbero.<br>Ingresá tu clave para abrir el panel.</p>
         <div class="field">
-          <label for="barberSecretInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Clave de Barbero</label>
+          <label for="barberSecretInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Clave de barbero</label>
           <input type="text" id="barberSecretInput" placeholder="Tu clave secreta" required>
         </div>
         <button class="btn" id="unlockBtn">Entrar</button>
@@ -1313,7 +1313,7 @@
         <div class="field">
           <label for="staffNameInput">Barberos / sillas (dejar vacío si trabajás solo)</label>
           <div class="row">
-            <div class="field"><input type="text" id="staffNameInput" placeholder="Nombre del Barbero"></div>
+            <div class="field"><input type="text" id="staffNameInput" placeholder="Nombre del barbero"></div>
             <div class="field"><input type="text" id="staffCalendarInput" placeholder="ID de su Google Calendar (opcional)"></div>
             <div class="field" style="flex:0 0 auto;">
               <button class="btn secondary small" id="addStaffBtn">Agregar</button>
@@ -1338,8 +1338,9 @@
               <option value="15">15 min</option>
               <option value="30">30 min</option>
               <option value="45">45 min</option>
-              <option value="60">60 min</option>
+              <option value="60" selected>60 min (1 hora)</option>
             </select>
+            <div class="helper">Por defecto cada turno dura 1 hora. El cliente solo ve los horarios libres; vos definís días, horarios y bloqueos en este panel.</div>
           </div>
         </div>
 
@@ -1534,14 +1535,14 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzNG6PwyZ8giSj61mL-GhuQRBfilHusRdQ1g83TA2_np0eLqO4Ih8bwnWiLz82AdgXLGA/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyxxTpiw8AT8DdlB-pZ2GHE8rhz6AUDHSMSVvMbCWq23oDfFMi8UfcHEtkO9UuOq7hquA/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
     days: [1,2,3,4,5,6],
     startHour: 9,
     endHour: 19,
-    slotMin: 30,
+    slotMin: 60,
     blocked: [],
     cutTypes: [{name:'Corte clásico', price:0}, {name:'Fade', price:0}, {name:'Corte + barba', price:0}],
     staff: [{id:'default', name:'', calendarId:''}],
@@ -1551,8 +1552,8 @@
   };
 
   let config = {...defaultConfig};
-  let workingCutTypes = []; // copia editable en el panel del Barbero, antes de guardar
-  let workingStaff = []; // idem para la lista de Barberos/sillas
+  let workingCutTypes = []; // copia editable en el panel del barbero, antes de guardar
+  let workingStaff = []; // idem para la lista de barberos/sillas
   let appointments = [];
   let selectedTime = null;
   let selectedStaffId = null;
@@ -1590,7 +1591,7 @@
     }
   }
 
-  // Token de sesión del Barbero (nunca guardamos la clave secreta en sí, solo este
+  // Token de sesión del barbero (nunca guardamos la clave secreta en sí, solo este
   // token firmado por el servidor que expira solo a las pocas horas).
   let barberToken = '';
   try{ barberToken = localStorage.getItem(TOKEN_KEY) || ''; }catch(e){ barberToken = ''; }
@@ -1631,7 +1632,7 @@
 
   // El botón ⚙ de Configuración técnica (URL de Apps Script) ahora usa
   // SIEMPRE este PIN fijo local, sin depender del servidor ni de la clave
-  // de Barbero. Cambialo acá si querés otro PIN permanente.
+  // de barbero. Cambialo acá si querés otro PIN permanente.
   function submitPin(){
     const typed = pinInput.value.trim();
     if(!typed){ return; }
@@ -1691,7 +1692,7 @@
   // Limpia Cache Storage y cualquier Service Worker registrado (si los hubiera),
   // y fuerza una recarga completa agregando un parámetro único a la URL para que
   // el navegador no sirva una versión vieja del HTML/JS desde su caché HTTP.
-  // No borra localStorage (URL de Apps Script configurada, sesión del Barbero,
+  // No borra localStorage (URL de Apps Script configurada, sesión del barbero,
   // tema) para no desconfigurar nada; solo limpia caché de archivos.
   const clearCacheBtn = document.getElementById('clearCacheBtn');
   if(clearCacheBtn){
@@ -1815,13 +1816,13 @@
     return jsonpRequestTo(SHEETS_API_URL, params, timeoutMs);
   }
 
-  // ----- Lectura de agenda optimizada -----
-  // 1) Una sola petición en vuelo (dedupe): varios loadAll/apiGet a la vez
-  //    reusan la misma Promise.
-  // 2) Si los datos tienen menos de FRESH_MS, se devuelven al instante
-  //    (sin red) salvo que se pida forceFresh.
-  // 3) El servidor cachea 8s (getAgendaSnapshot); el front evita picos.
-  const FRESH_MS = 8000;
+  // ----- Lectura de agenda (prioridad: datos correctos al cliente) -----
+  // - Polling frecuente mientras la pestaña está visible.
+  // - Al mostrar horarios / confirmar: SIEMPRE red + fresh=1 en el servidor.
+  // - Caché local muy corta solo para el indicador de conexión / panel barbero.
+  const FRESH_MS = 2000;           // memoria local máx. 2s
+  const POLL_MS_VISIBLE = 3000;    // cada 3s con la pestaña abierta
+  const POLL_MS_HIDDEN = 15000;    // más lento si está en segundo plano
   let agendaInFlight = null;
   let lastAgendaAt = 0;
   let lastAgendaData = null;
@@ -1830,13 +1831,22 @@
     opts = opts || {};
     const forceFresh = !!opts.forceFresh;
     const now = Date.now();
+    // Solo reusar memoria si NO se pide fresco y tiene < 2s
     if(!forceFresh && lastAgendaData && (now - lastAgendaAt) < FRESH_MS){
       return lastAgendaData;
     }
+    // Si hay petición en vuelo y no exigimos fresco forzado, reutilizar
+    if(agendaInFlight && !forceFresh){
+      return agendaInFlight;
+    }
+    // Si exigimos fresco pero hay in-flight, igual esperamos esa (evita tormenta)
+    // salvo que queramos una nueva en paralelo — preferimos una sola.
     if(agendaInFlight){
       return agendaInFlight;
     }
-    agendaInFlight = jsonpRequest({ _ts: now }, opts.timeoutMs || JSONP_TIMEOUT_MS)
+    const params = { _ts: now };
+    if(forceFresh) params.fresh = '1'; // bypass caché del servidor
+    agendaInFlight = jsonpRequest(params, opts.timeoutMs || JSONP_TIMEOUT_MS)
       .then(function(data){
         lastAgendaData = data;
         lastAgendaAt = Date.now();
@@ -1846,9 +1856,9 @@
     return agendaInFlight;
   }
 
-  // Tras una escritura, invalidamos la frescura local para forzar relectura.
   function markAgendaStale(){
     lastAgendaAt = 0;
+    lastAgendaData = null;
   }
 
   async function apiPost(action, payload){
@@ -1871,7 +1881,7 @@
   }
 
   // Verifica una clave contra el servidor (misma validación para el candado de
-  // Barbero y para la configuración técnica). Si es correcta, devuelve un token de
+  // barbero y para la configuración técnica). Si es correcta, devuelve un token de
   // sesión firmado por el servidor (válido por unas horas); si no, devuelve null.
   // La clave en sí nunca se guarda ni se reenvía en cada acción.
   async function loginOnServer(candidate){
@@ -1886,11 +1896,9 @@
   async function loadAll(opts){
     if(!apiReady) return;
     opts = opts || {};
-    // Si ya hay un loadAll en curso, reutilizamos esa promesa (polling no apila).
     if(loadAllInFlight) return loadAllInFlight;
 
-    // Si tenemos datos recientes y no es la carga inicial forzada, solo
-    // re-renderizamos y actualizamos el estado "online" sin tocar la red.
+    // Caché local solo 2s y solo si no forzamos. El polling pide red seguido.
     const hasFresh = lastAgendaData && (Date.now() - lastAgendaAt) < FRESH_MS;
     if(hasFresh && !opts.force){
       applyServerData(lastAgendaData);
@@ -1903,16 +1911,18 @@
       return;
     }
 
-    setConnectionStatus('checking');
+    if(!opts.silent) setConnectionStatus('checking');
     loadAllInFlight = (async function(){
       try{
-        const data = await apiGet({ forceFresh: !!opts.force, timeoutMs: opts.timeoutMs });
+        // force o poll: siempre intentar red; force → fresh=1 en servidor
+        const data = await apiGet({
+          forceFresh: !!opts.force,
+          timeoutMs: opts.timeoutMs
+        });
         applyServerData(data);
         setConnectionStatus('online');
       }catch(e){
         console.error(e);
-        // Si falló pero teníamos datos previos, seguimos "online" con lo último
-        // conocido en vez de marcar offline y vaciar la UI.
         if(lastAgendaData){
           applyServerData(lastAgendaData);
           setConnectionStatus('online');
@@ -1952,7 +1962,7 @@
     startBarberLockTimer();
   }
 
-  // ---------- Bloqueo automático del panel del Barbero por inactividad ----------
+  // ---------- Bloqueo automático del panel del barbero por inactividad ----------
   // Después de BARBER_LOCK_MINUTES sin actividad (mientras el panel está
   // desbloqueado), se cierra la sesión sola y vuelve a pedir la clave.
   // Cambiá el número de acá si querés otro tiempo.
@@ -1965,7 +1975,7 @@
     try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
     stopBarberLockTimer();
     const activeTab = document.querySelector('.tab.active');
-    if(activeTab && activeTab.dataset.view === 'Barbero'){
+    if(activeTab && activeTab.dataset.view === 'barbero'){
       showBarberLock();
       const msgEl = document.getElementById('unlockMsg');
       const text = reason === 'guardado'
@@ -1983,10 +1993,10 @@
     if(barberLockTimer){ clearTimeout(barberLockTimer); barberLockTimer = null; }
   }
   function resetBarberLockTimer(){
-    // solo reinicia la cuenta si hay una sesión de Barbero activa Y esa
+    // solo reinicia la cuenta si hay una sesión de barbero activa Y esa
     // pestaña es la que está viendo la persona en este momento
     const activeTab = document.querySelector('.tab.active');
-    const onBarberTab = activeTab && activeTab.dataset.view === 'Barbero';
+    const onBarberTab = activeTab && activeTab.dataset.view === 'barbero';
     if(barberToken && onBarberTab && document.getElementById('barberContent').style.display !== 'none'){
       startBarberLockTimer();
     }
@@ -2038,7 +2048,7 @@
       document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById('panel-'+tab.dataset.view).classList.add('active');
-      if(tab.dataset.view === 'Barbero'){
+      if(tab.dataset.view === 'barbero'){
         if(barberToken){ autoUnlockIfPossible(); } else { showBarberLock(); }
       }
     });
@@ -2239,7 +2249,7 @@
 
   function startBookingFlow(){
     if(!apiReady){
-      addBotMessage('⚠️ Todavía no está conectada la hoja de Google Sheets. El Barbero debe configurar la URL con el botón ⚙.');
+      addBotMessage('⚠️ Todavía no está conectada la hoja de Google Sheets. El barbero debe configurar la URL con el botón ⚙.');
       showWelcome();
       return;
     }
@@ -2304,7 +2314,7 @@
     chatStep = 'cut';
     const cuts = config.cutTypes || [];
     if(cuts.length === 0){
-      addBotMessage('Todavía no hay servicios configurados. Contactá al Barbero.');
+      addBotMessage('Todavía no hay servicios configurados. Contactá al barbero.');
       showWelcome();
       return;
     }
@@ -2393,17 +2403,12 @@
       return;
     }
 
-    // Refresco rápido: si la agenda se sincronizó hace < 8s, no esperamos red.
-    // Si está vieja, consultamos (con spinner). La validación final al confirmar
-    // igual evita doble reserva.
+    // SIEMPRE consultar al servidor antes de mostrar horarios al cliente
+    // (fresh=1 bypass caché). Así no ofrecemos un hueco que otro acaba de tomar.
     clearQuickReplies();
-    const needsNetwork = !(lastAgendaData && (Date.now() - lastAgendaAt) < FRESH_MS);
-    let loadingMsg = null;
-    if(needsNetwork){
-      loadingMsg = addBotMessage('<span class="spinner"></span> Consultando horarios disponibles...');
-    }
+    const loadingMsg = addBotMessage('<span class="spinner"></span> Consultando horarios actualizados...');
     try{
-      const fresh = await apiGet({ forceFresh: needsNetwork, timeoutMs: JSONP_TIMEOUT_FAST_MS });
+      const fresh = await apiGet({ forceFresh: true, timeoutMs: JSONP_TIMEOUT_MS });
       applyServerData(fresh);
     }catch(e){
       console.error('No se pudo refrescar turnos: ' + e.message);
@@ -2413,7 +2418,7 @@
         addQuickReplies([{ label:'🔄 Reintentar', onClick: ()=>handleDatePick(dateStr) }]);
         return;
       }
-      // Hay datos previos: seguimos con ellos
+      addBotMessage('⚠️ Usando la última agenda conocida; puede no estar 100% al día.');
     }
     if(loadingMsg && loadingMsg.remove) loadingMsg.remove();
 
@@ -2434,14 +2439,14 @@
     // DIAGNÓSTICO: dejá esto un tiempo para poder revisar en la consola del
     // navegador (F12 → Console) qué turnos llegaron del servidor justo antes
     // de mostrar los horarios, y confirmar si el turno "ocupado" que esperás
-    // ver excluido realmente está en la lista con la fecha/hora/Barbero
+    // ver excluido realmente está en la lista con la fecha/hora/barbero
     // exactos.
     console.log('[chat] fecha consultada:', dateStr, 'staffId:', staffId);
     console.log('[chat] total appointments recibidos:', appointments.length, appointments);
     console.log('[chat] horarios ya tomados detectados:', takenTimes);
 
     if(allSlots.length === 0){
-      addBotMessage('No hay horarios disponibles configurados. Contactá al Barbero.');
+      addBotMessage('No hay horarios disponibles configurados. Contactá al barbero.');
       showWelcome();
       return;
     }
@@ -2724,7 +2729,7 @@
   }
 
   function openWhatsappReminder(apt){
-    const phone = getWhatsappPhone(); // opcional: si el Barbero lo cargó, va directo a ese número
+    const phone = getWhatsappPhone(); // opcional: si el barbero lo cargó, va directo a ese número
     const shop = config.barberName || 'LA ESTACION - BARBERIA';
     const priceTxt = apt.price ? (' · $' + apt.price) : '';
     const msg =
@@ -2825,10 +2830,10 @@
     if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('addCutTypeBtn').click(); }
   });
 
-  // ---------- barber: Barberos / sillas ----------
+  // ---------- barber: barberos / sillas ----------
   function renderStaffList(){
     const list = document.getElementById('staffList');
-    if(workingStaff.length===0){ list.innerHTML = '<div class="helper">Un solo Barbero (vos). Agregá nombres solo si trabajan varios.</div>'; return; }
+    if(workingStaff.length===0){ list.innerHTML = '<div class="helper">Un solo barbero (vos). Agregá nombres solo si trabajan varios.</div>'; return; }
     list.innerHTML = workingStaff
       .map((s, i) => `<span class="blocked-chip">${escapeHtml(s.name || '(sin nombre)')} <button data-idx="${i}" aria-label="Quitar">✕</button></span>`)
       .join('');
@@ -2892,7 +2897,7 @@
       renderStaffOptions();
       if(document.getElementById('panel-cliente').classList.contains('active')) initChat();
       // Por seguridad, después de guardar cambios de configuración se cierra
-      // la sesión del Barbero sola y hay que volver a poner la clave.
+      // la sesión del barbero sola y hay que volver a poner la clave.
       setTimeout(function(){ lockBarberPanelNow('guardado'); }, 1200);
     }catch(e){
       msgEl.innerHTML = '<div class="msg err">No se pudo guardar. ' + e.message + '</div>';
@@ -3029,7 +3034,7 @@
     if(!dateStr || !rescheduleTarget) return;
 
     if(!config.days.includes(dateToWeekday(dateStr))){
-      rescheduleStatus.innerHTML = '<div class="msg warn">El Barbero no atiende ese día.</div>';
+      rescheduleStatus.innerHTML = '<div class="msg warn">El barbero no atiende ese día.</div>';
       return;
     }
     if(config.blocked.includes(dateStr)){
@@ -3099,14 +3104,26 @@
     renderAppointmentsList();
   });
 
-  // ---------- polling for near-live sync ----------
-  function startPolling(){
-    if(!apiReady) return;
+  // ---------- polling exhaustivo de agenda ----------
+  function schedulePoll(){
     if(refreshTimer) clearInterval(refreshTimer);
-    refreshTimer = setInterval(function(){ loadAll(); }, 5000);
+    if(!apiReady) return;
+    const ms = document.hidden ? POLL_MS_HIDDEN : POLL_MS_VISIBLE;
+    refreshTimer = setInterval(function(){
+      // silent: no parpadear "Verificando…" cada 3s
+      loadAll({ force: !document.hidden, silent: true });
+    }, ms);
+  }
+  function startPolling(){
+    schedulePoll();
   }
   document.addEventListener('visibilitychange', ()=>{
-    if(!document.hidden && !selfManageMode) loadAll();
+    if(selfManageMode) return;
+    schedulePoll();
+    if(!document.hidden){
+      // Al volver a la pestaña: lectura forzada al servidor
+      loadAll({ force: true, silent: true });
+    }
   });
 
   // ---------- estadísticas (barbero) ----------
