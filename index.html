@@ -1541,10 +1541,18 @@
   const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyWpary7U6Lw2n5gjXTkQ1FZlV4SRzIeC-CiolW0zodxqMV_r12da0Xl-AT1QqNpE436A/exec';
 
   const defaultConfig = {
-    barberName: 'LA ESTACION -BARBERIA',
-    days: [1,2,3,4,5,6],
-    startHour: 9,
-    endHour: 19,
+    barberName: 'LA ESTACION - BARBERIA',
+    days: [0, 1, 3, 4, 5, 6],
+    dayHours: {
+      '0': { start: 7, end: 13 },
+      '1': { start: 8, end: 18 },
+      '3': { start: 7, end: 18 },
+      '4': { start: 8, end: 18 },
+      '5': { start: 8, end: 18 },
+      '6': { start: 8, end: 18 }
+    },
+    startHour: 8,
+    endHour: 18,
     slotMin: 60,
     blocked: [],
     cutTypes: [{name:'Corte clásico', price:0}, {name:'Fade', price:0}, {name:'Corte + barba', price:0}],
@@ -1947,7 +1955,35 @@
   // ofreciendo la configuración anterior mientras está abierto.
   function applyServerData(data){
     config = {...defaultConfig, ...(data.config||{})};
+    if(!config.dayHours || typeof config.dayHours !== 'object'){
+      config.dayHours = Object.assign({}, defaultConfig.dayHours || {});
+    }
+    Object.keys(defaultConfig.dayHours || {}).forEach(function(k){
+      if(!config.dayHours[k]) config.dayHours[k] = Object.assign({}, defaultConfig.dayHours[k]);
+    });
     appointments = Array.isArray(data.appointments) ? data.appointments : [];
+  }
+
+  function getDayHours(weekday){
+    var dh = (config.dayHours || {})[String(weekday)];
+    if(dh && isFinite(Number(dh.start)) && isFinite(Number(dh.end))){
+      return { start: Number(dh.start), end: Number(dh.end) };
+    }
+    return { start: Number(config.startHour) || 8, end: Number(config.endHour) || 18 };
+  }
+  function getDayHoursForDate(dateStr){
+    return getDayHours(dateToWeekday(dateStr));
+  }
+  function staffNameById(staffId){
+    var id = staffId || 'default';
+    var list = config.staff || [];
+    for(var i = 0; i < list.length; i++){
+      if(String(list[i].id || 'default') === String(id)){
+        var n = list[i].name ? String(list[i].name).trim() : '';
+        return n;
+      }
+    }
+    return '';
   }
 
   // ---------- barber: lock screen ----------
@@ -2087,10 +2123,13 @@
   let chatTyping = false;
 
   function getDaysHelperText(){
-    const names = config.days.slice().sort().map(d=>DIAS_LARGO[d]);
-    return names.length
-      ? 'Atendemos: ' + names.join(', ') + ', de ' + config.startHour + ':00 a ' + config.endHour + ':00.'
-      : 'Todavía no hay horarios configurados.';
+    const days = (config.days || []).slice().sort(function(a,b){ return a-b; });
+    if(!days.length) return 'Todavía no hay horarios configurados.';
+    const parts = days.map(function(d){
+      const h = getDayHours(d);
+      return DIAS_LARGO[d] + ' ' + h.start + ':00–' + h.end + ':00';
+    });
+    return 'Atendemos: ' + parts.join(' · ') + '. Turnos de ' + (config.slotMin || 60) + ' min.';
   }
 
   function scrollChatToBottom(){
@@ -3046,7 +3085,12 @@
         : 'Todavía no hay turnos agendados.') + '</div>';
       return;
     }
-    el.innerHTML = upcoming.map(a=>ticketHtml(a, true)).join('');
+    try{
+      el.innerHTML = upcoming.map(a=>ticketHtml(a, true)).join('');
+    }catch(err){
+      console.error('ticketHtml', err);
+      el.innerHTML = '<div class="empty">Error al mostrar turnos.</div>';
+    }
     el.querySelectorAll('[data-cancel]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
         try{
@@ -3324,11 +3368,18 @@
   }
 
   if(selfManageId && selfManageToken){
-    loadAll({ force: true }).then(initSelfManage);
+    loadAll({ force: true }).then(initSelfManage).catch(function(e){
+      console.error(e);
+      initSelfManage();
+    });
   }else{
-    loadAll({ force: true }).then(()=>{
+    loadAll({ force: true }).then(function(){
       initChat();
       startPolling();
+    }).catch(function(e){
+      console.error('loadAll error', e);
+      try{ initChat(); }catch(e2){ console.error(e2); }
+      try{ startPolling(); }catch(e3){}
     });
   }
 })();
