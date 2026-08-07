@@ -2257,6 +2257,28 @@
     selectedStaffId = (config.staff && config.staff[0]) ? config.staff[0].id : 'default';
   }
 
+  /** Cancela el flujo de reserva y vuelve al menú inicial. */
+  function cancelBookingFlow(){
+    resetChatBooking();
+    chatMode = null;
+    chatStep = 'idle';
+    clearQuickReplies();
+    addBotMessage('Listo, <strong>cancelé el agendado</strong>. No se reservó ningún turno.<br><br>Cuando quieras, podés empezar de nuevo.');
+    addQuickReplies([
+      { label:'📅 Agendar un turno', onClick: startBookingFlow },
+      { label:'🔍 Buscar mis turnos', onClick: startLookupFlow },
+      { label:'🕐 Ver horarios', onClick: showHoursInfo },
+      { label:'↩ Volver al inicio', onClick: showWelcome }
+    ]);
+  }
+
+  /** Respuestas rápidas del flujo de reserva, siempre con opción de cancelar. */
+  function addBookingReplies(items){
+    const list = (items || []).slice();
+    list.push({ label: '❌ Cancelar agendado', onClick: cancelBookingFlow });
+    addQuickReplies(list);
+  }
+
   function showWelcome(){
     chatMode = null;
     chatStep = 'welcome';
@@ -2312,6 +2334,7 @@
       chatBooking.name = text;
       showTypingThen(askPhone);
     });
+    addBookingReplies([]);
   }
 
   function startLookupFlow(){
@@ -2353,6 +2376,7 @@
       chatBooking.phone = text.trim();
       showTypingThen(askCutType);
     });
+    addBookingReplies([]);
   }
 
   function askCutType(){
@@ -2364,7 +2388,7 @@
       return;
     }
     addBotMessage('¿Qué <strong>tipo de corte o servicio</strong> querés?');
-    addQuickReplies(cuts.map(ct=>({
+    addBookingReplies(cuts.map(ct=>({
       label: ct.price ? (ct.name + ' — $' + ct.price) : ct.name,
       value: ct.name,
       onPick: (v)=>{ chatBooking.cut = v; afterCutSelected(); }
@@ -2389,7 +2413,7 @@
     chatStep = 'staff';
     const staffList = (config.staff || []).filter(s=>s.name && s.name.trim());
     addBotMessage('¿Con quién preferís atenderte?');
-    addQuickReplies(staffList.map(s=>({
+    addBookingReplies(staffList.map(s=>({
       label: s.name,
       value: s.id,
       onPick: (v)=>{
@@ -2413,6 +2437,7 @@
       chatBooking.email = text;
       showTypingThen(askConfirm);
     });
+    addBookingReplies([]);
   }
 
   function askDate(){
@@ -2430,6 +2455,7 @@
       addUserMessage(formatDate(picker.value));
       handleDatePick(picker.value);
     });
+    addBookingReplies([]);
   }
 
   async function handleDatePick(dateStr){
@@ -2514,7 +2540,7 @@
 
     addBotMessage('Estos son los horarios disponibles para el <strong>' + formatDate(dateStr) + '</strong>:');
     // No mostramos los horarios ocupados: el cliente solo puede elegir una hora libre.
-    addQuickReplies(freeSlots.map(t=>({
+    addBookingReplies(freeSlots.map(t=>({
       label: t,
       value: t,
       onPick: (v)=>{ chatBooking.time = v; selectedTime = v; askEmail(); }
@@ -2583,7 +2609,7 @@
     addQuickReplies([
       { label:'✅ Sí, confirmar turno', onClick: confirmBookingFromChat },
       { label:'✏️ Cambiar horario', onClick: ()=>{ addUserMessage('Cambiar horario'); askDate(); } },
-      { label:'❌ Cancelar', onClick: showWelcome }
+      { label:'❌ Cancelar agendado', onClick: cancelBookingFlow }
     ]);
   }
 
