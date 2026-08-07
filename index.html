@@ -1335,6 +1335,9 @@
           <div class="field">
             <label for="slotMin">Duración del turno <span class="required-mark">*</span></label>
             <select id="slotMin" required>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
               <option value="60">60 min</option>
             </select>
           </div>
@@ -1531,7 +1534,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwYxx9Gw-5qjyZXXgZNReRVYMYCtvlIZ8QmBeQb2uS79EF5QTpPwZQCl4oDvU4pbIlxSA/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/library/d/1H8Iqz-qvCC5ohfjupKB32FB_A0-4n_lkl8Dbx_m5Pz2vFqrJ_ZANMuWe/21';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -1748,7 +1751,7 @@
     }
     settingsStatus.innerHTML = '<span class="spinner"></span>Probando conexión...';
     try{
-      const data = await jsonpRequestTo(value, {});
+      const data = await jsonpRequestTo(value, {}, JSONP_TIMEOUT_FAST_MS);
       if(!data || !data.config) throw new Error('La respuesta no tiene el formato esperado.');
       settingsStatus.innerHTML = '<span style="color:var(--ok)">✓ Conexión exitosa. Barbería encontrada: ' + (data.config.barberName || 'LA ESTACION - BARBERIA') + '.</span>';
     }catch(e){
@@ -1768,6 +1771,11 @@
   // (addAppointment, saveConfig, etc.) se mandan como GET con la acción y el
   // payload codificados en la URL; el servidor los procesa igual.
   let jsonpCounter = 0;
+  // Timeout más corto: si GAS no responde en 10s, fallamos y reintentamos
+  // en el próximo poll en vez de colgar la UI 15s.
+  const JSONP_TIMEOUT_MS = 10000;
+  const JSONP_TIMEOUT_FAST_MS = 7000;
+
   function jsonpRequestTo(url, params, timeoutMs){
     return new Promise((resolve, reject)=>{
       const cbName = 'barbJsonp_' + (Date.now()) + '_' + (jsonpCounter++);
@@ -1778,7 +1786,7 @@
         settled = true;
         cleanup();
         reject(new Error('Tiempo de espera agotado al conectar con el servidor.'));
-      }, timeoutMs || 15000);
+      }, timeoutMs || JSONP_TIMEOUT_MS);
       function cleanup(){
         clearTimeout(timer);
         delete window[cbName];
@@ -1807,13 +1815,50 @@
     return jsonpRequestTo(SHEETS_API_URL, params, timeoutMs);
   }
 
-  async function apiGet(){
-    // Cada consulta debe leer el estado actual de la agenda, sin caché.
-    return jsonpRequest({ _ts: Date.now() });
+  // ----- Lectura de agenda optimizada -----
+  // 1) Una sola petición en vuelo (dedupe): varios loadAll/apiGet a la vez
+  //    reusan la misma Promise.
+  // 2) Si los datos tienen menos de FRESH_MS, se devuelven al instante
+  //    (sin red) salvo que se pida forceFresh.
+  // 3) El servidor cachea 8s (getAgendaSnapshot); el front evita picos.
+  const FRESH_MS = 8000;
+  let agendaInFlight = null;
+  let lastAgendaAt = 0;
+  let lastAgendaData = null;
+
+  async function apiGet(opts){
+    opts = opts || {};
+    const forceFresh = !!opts.forceFresh;
+    const now = Date.now();
+    if(!forceFresh && lastAgendaData && (now - lastAgendaAt) < FRESH_MS){
+      return lastAgendaData;
+    }
+    if(agendaInFlight){
+      return agendaInFlight;
+    }
+    agendaInFlight = jsonpRequest({ _ts: now }, opts.timeoutMs || JSONP_TIMEOUT_MS)
+      .then(function(data){
+        lastAgendaData = data;
+        lastAgendaAt = Date.now();
+        return data;
+      })
+      .finally(function(){ agendaInFlight = null; });
+    return agendaInFlight;
   }
+
+  // Tras una escritura, invalidamos la frescura local para forzar relectura.
+  function markAgendaStale(){
+    lastAgendaAt = 0;
+  }
+
   async function apiPost(action, payload){
     const fullPayload = Object.assign({}, payload, { token: barberToken });
-    const data = await jsonpRequest({ action: action, payload: JSON.stringify(fullPayload), _ts: Date.now() });
+    const data = await jsonpRequest({
+      action: action,
+      payload: JSON.stringify(fullPayload),
+      _ts: Date.now()
+    }, JSONP_TIMEOUT_MS);
+    markAgendaStale();
     if(!data.ok){
       if(data.error && data.error.indexOf('Sesión') !== -1){
         barberToken = '';
@@ -1830,26 +1875,58 @@
   // sesión firmado por el servidor (válido por unas horas); si no, devuelve null.
   // La clave en sí nunca se guarda ni se reenvía en cada acción.
   async function loginOnServer(candidate){
-    const data = await jsonpRequest({ action:'checkSecret', payload: JSON.stringify({ secret: candidate }) });
+    const data = await jsonpRequest(
+      { action:'checkSecret', payload: JSON.stringify({ secret: candidate }) },
+      JSONP_TIMEOUT_FAST_MS
+    );
     return data.ok ? data.token : null;
   }
 
-  async function loadAll(){
+  let loadAllInFlight = null;
+  async function loadAll(opts){
     if(!apiReady) return;
-    setConnectionStatus('checking');
-    try{
-      const data = await apiGet();
-      applyServerData(data);
+    opts = opts || {};
+    // Si ya hay un loadAll en curso, reutilizamos esa promesa (polling no apila).
+    if(loadAllInFlight) return loadAllInFlight;
+
+    // Si tenemos datos recientes y no es la carga inicial forzada, solo
+    // re-renderizamos y actualizamos el estado "online" sin tocar la red.
+    const hasFresh = lastAgendaData && (Date.now() - lastAgendaAt) < FRESH_MS;
+    if(hasFresh && !opts.force){
+      applyServerData(lastAgendaData);
       setConnectionStatus('online');
-    }catch(e){
-      console.error(e);
-      setConnectionStatus('offline', e && e.message ? e.message : '');
+      renderShopHeader();
+      renderStaffOptions();
+      renderBarberConfig();
+      renderAppointmentsList();
+      renderBlockedList();
+      return;
     }
-    renderShopHeader();
-    renderStaffOptions();
-    renderBarberConfig();
-    renderAppointmentsList();
-    renderBlockedList();
+
+    setConnectionStatus('checking');
+    loadAllInFlight = (async function(){
+      try{
+        const data = await apiGet({ forceFresh: !!opts.force, timeoutMs: opts.timeoutMs });
+        applyServerData(data);
+        setConnectionStatus('online');
+      }catch(e){
+        console.error(e);
+        // Si falló pero teníamos datos previos, seguimos "online" con lo último
+        // conocido en vez de marcar offline y vaciar la UI.
+        if(lastAgendaData){
+          applyServerData(lastAgendaData);
+          setConnectionStatus('online');
+        }else{
+          setConnectionStatus('offline', e && e.message ? e.message : '');
+        }
+      }
+      renderShopHeader();
+      renderStaffOptions();
+      renderBarberConfig();
+      renderAppointmentsList();
+      renderBlockedList();
+    })().finally(function(){ loadAllInFlight = null; });
+    return loadAllInFlight;
   }
 
   // La configuración que manda el servidor es la fuente de verdad. Así, si el
@@ -2139,8 +2216,7 @@
     const welcomeReplies = [
       { label:'📅 Agendar un turno', onClick: startBookingFlow },
       { label:'🔍 Buscar mis turnos', onClick: startLookupFlow },
-      { label:'🕐 Ver horarios', onClick: showHoursInfo },
-      { label:'↩ Volver al inicio', onClick: showWelcome }
+      { label:'🕐 Ver horarios', onClick: showHoursInfo }
     ];
     if(getWhatsappPhone()){
       welcomeReplies.push({
@@ -2317,23 +2393,27 @@
       return;
     }
 
-    // Refrescamos los turnos desde Sheets justo antes de mostrar los horarios,
-    // para que la disponibilidad que ve el usuario esté lo más al día posible
-    // (evita mostrar como "libre" un horario que otra persona acaba de tomar).
+    // Refresco rápido: si la agenda se sincronizó hace < 8s, no esperamos red.
+    // Si está vieja, consultamos (con spinner). La validación final al confirmar
+    // igual evita doble reserva.
     clearQuickReplies();
-    const loadingMsg = addBotMessage('<span class="spinner"></span> Consultando horarios disponibles...');
+    const needsNetwork = !(lastAgendaData && (Date.now() - lastAgendaAt) < FRESH_MS);
+    let loadingMsg = null;
+    if(needsNetwork){
+      loadingMsg = addBotMessage('<span class="spinner"></span> Consultando horarios disponibles...');
+    }
     try{
-      const fresh = await apiGet();
+      const fresh = await apiGet({ forceFresh: needsNetwork, timeoutMs: JSONP_TIMEOUT_FAST_MS });
       applyServerData(fresh);
     }catch(e){
-      // Si falla el refresco, seguimos con los datos que ya teníamos en memoria
-      // en vez de bloquear al usuario; la validación final antes de confirmar
-      // igual va a proteger contra choques de horario.
       console.error('No se pudo refrescar turnos: ' + e.message);
       if(loadingMsg && loadingMsg.remove) loadingMsg.remove();
-      addBotMessage('No pude consultar la agenda actual. Probá de nuevo para ver horarios reales.');
-      addQuickReplies([{ label:'🔄 Reintentar', onClick: ()=>handleDatePick(dateStr) }]);
-      return;
+      if(!lastAgendaData){
+        addBotMessage('No pude consultar la agenda actual. Probá de nuevo para ver horarios reales.');
+        addQuickReplies([{ label:'🔄 Reintentar', onClick: ()=>handleDatePick(dateStr) }]);
+        return;
+      }
+      // Hay datos previos: seguimos con ellos
     }
     if(loadingMsg && loadingMsg.remove) loadingMsg.remove();
 
@@ -2467,7 +2547,9 @@
     const staffId = chatBooking.staffId || selectedStaffId || 'default';
 
     try{
-      const fresh = await apiGet();
+      // Siempre datos frescos del servidor antes de confirmar (anti doble-turno).
+      // forceFresh evita usar el snapshot de 8s del front.
+      const fresh = await apiGet({ forceFresh: true, timeoutMs: JSONP_TIMEOUT_MS });
       applyServerData(fresh);
       const stillFree = !appointments.some(a=>
         a.date===chatBooking.date && a.time===chatBooking.time && (a.staffId||'default')===staffId
@@ -3021,7 +3103,7 @@
   function startPolling(){
     if(!apiReady) return;
     if(refreshTimer) clearInterval(refreshTimer);
-    refreshTimer = setInterval(loadAll, 8000);
+    refreshTimer = setInterval(function(){ loadAll(); }, 5000);
   }
   document.addEventListener('visibilitychange', ()=>{
     if(!document.hidden && !selfManageMode) loadAll();
@@ -3157,9 +3239,9 @@
   }
 
   if(selfManageId && selfManageToken){
-    loadAll().then(initSelfManage);
+    loadAll({ force: true }).then(initSelfManage);
   }else{
-    loadAll().then(()=>{
+    loadAll({ force: true }).then(()=>{
       initChat();
       startPolling();
     });
