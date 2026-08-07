@@ -1296,6 +1296,8 @@
 
         <label>Días de atención <span class="required-mark">*</span></label>
         <div class="days-grid" id="daysGrid"></div>
+        <div class="helper" style="margin-top:8px;margin-bottom:6px;">Horario de cada día (inicio – fin). El cliente solo ve turnos dentro de estos rangos.</div>
+        <div id="dayHoursEditor" style="display:grid;gap:8px;margin-bottom:14px;"></div>
 
         <div class="field">
           <label for="cutTypeInput">Tipos de corte que ofreces <span class="required-mark">*</span></label>
@@ -1312,6 +1314,7 @@
 
         <div class="field">
           <label for="staffNameInput">Barberos / sillas (dejar vacío si trabajás solo)</label>
+          <div class="helper">Si agregás 2 o más nombres, el cliente podrá elegir con quién atenderse. Al cambiar un nombre y guardar, se actualiza en toda la app (los turnos guardan el id del barbero).</div>
           <div class="row">
             <div class="field"><input type="text" id="staffNameInput" placeholder="Nombre del barbero"></div>
             <div class="field"><input type="text" id="staffCalendarInput" placeholder="ID de su Google Calendar (opcional)"></div>
@@ -1535,7 +1538,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyxxTpiw8AT8DdlB-pZ2GHE8rhz6AUDHSMSVvMbCWq23oDfFMi8UfcHEtkO9UuOq7hquA/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyWpary7U6Lw2n5gjXTkQ1FZlV4SRzIeC-CiolW0zodxqMV_r12da0Xl-AT1QqNpE436A/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION -BARBERIA',
@@ -2431,7 +2434,7 @@
     }
 
     const staffId = chatBooking.staffId || selectedStaffId || 'default';
-    const allSlots = generateSlotsForDate();
+    const allSlots = generateSlotsForDate(dateStr);
     const takenTimes = appointments
       .filter(a=>a.date===dateStr && (a.staffId||'default')===staffId)
       .map(a=>a.time);
@@ -2524,9 +2527,7 @@
     clearQuickReplies();
     const cutInfo = (config.cutTypes||[]).find(c=>c.name===chatBooking.cut);
     const priceTxt = cutInfo && cutInfo.price ? ' (aprox. $' + cutInfo.price + ')' : '';
-    const staffName = needsStaffChoice()
-      ? ((config.staff||[]).find(s=>s.id===chatBooking.staffId)||{}).name
-      : '';
+    const staffName = staffNameById(chatBooking.staffId || selectedStaffId);
     addBotMessage(
       'Resumen de tu turno:<br><br>' +
       '👤 <strong>' + escapeHtml(chatBooking.name) + '</strong><br>' +
@@ -2576,11 +2577,13 @@
       });
       appointments.push(result.appointment);
       const priceTxt = result.appointment.price ? (' · $' + result.appointment.price) : '';
+      const barberTxt = staffNameById(staffId);
       addBotMessage(
         '🎉 <strong>¡Turno confirmado!</strong><br><br>' +
         escapeHtml(chatBooking.name) + ' — ' + formatDate(chatBooking.date) + ' a las ' + chatBooking.time +
-        ' (' + escapeHtml(chatBooking.cut) + priceTxt + ')<br>' +
-        'N.° <strong>' + result.appointment.id + '</strong><br><br>' +
+        ' (' + escapeHtml(chatBooking.cut) + priceTxt + ')' +
+        (barberTxt ? '<br>🪑 Barbero: <strong>' + escapeHtml(barberTxt) + '</strong>' : '') +
+        '<br>N.° <strong>' + result.appointment.id + '</strong><br><br>' +
         'Te llegará un correo con la confirmación y el enlace para gestionar tu turno.'
       );
       ensureNotificationPermission().then(function(ok){
@@ -2679,15 +2682,17 @@
     return new Date(y, m-1, d).getDay();
   }
 
-  function generateSlotsForDate(){
+  function generateSlotsForDate(dateStr){
     const slots = [];
-    const endTotal = config.endHour * 60;
-    let cur = config.startHour * 60;
-    while(cur + config.slotMin <= endTotal){
+    const hours = dateStr ? getDayHoursForDate(dateStr) : { start: config.startHour, end: config.endHour };
+    const endTotal = Number(hours.end) * 60;
+    let cur = Number(hours.start) * 60;
+    const step = Number(config.slotMin) || 60;
+    while(cur + step <= endTotal){
       const hh = Math.floor(cur/60).toString().padStart(2,'0');
       const mm = (cur%60).toString().padStart(2,'0');
       slots.push(hh+':'+mm);
-      cur += config.slotMin;
+      cur += step;
     }
     return slots;
   }
@@ -2778,9 +2783,47 @@
     chip.dataset.day = idx;
     chip.addEventListener('click', ()=>{
       chip.classList.toggle('on');
+      renderDayHoursEditor();
     });
     daysGrid.appendChild(chip);
   });
+
+  function renderDayHoursEditor(){
+    const box = document.getElementById('dayHoursEditor');
+    if(!box) return;
+    const selected = [];
+    document.querySelectorAll('.day-chip.on').forEach(chip=>{
+      selected.push(Number(chip.dataset.day));
+    });
+    selected.sort((a,b)=>a-b);
+    if(!selected.length){
+      box.innerHTML = '<div class="helper">Seleccioná al menos un día de atención.</div>';
+      return;
+    }
+    box.innerHTML = selected.map(d=>{
+      const h = (config.dayHours && config.dayHours[String(d)])
+        ? config.dayHours[String(d)]
+        : { start: config.startHour || 8, end: config.endHour || 18 };
+      // Prefer values already typed in inputs if present
+      return '<div class="row" style="align-items:center;gap:8px;">' +
+        '<div class="field" style="min-width:90px;flex:0 0 auto;"><strong>' + DIAS_LARGO[d] + '</strong></div>' +
+        '<div class="field"><label>Desde</label><input type="number" class="day-hour-start" data-day="'+d+'" min="0" max="23" value="'+h.start+'"></div>' +
+        '<div class="field"><label>Hasta</label><input type="number" class="day-hour-end" data-day="'+d+'" min="1" max="24" value="'+h.end+'"></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function collectDayHoursFromEditor(){
+    const dayHours = {};
+    document.querySelectorAll('.day-hour-start').forEach(inp=>{
+      const d = String(inp.dataset.day);
+      const start = Number(inp.value);
+      const endInp = document.querySelector('.day-hour-end[data-day="'+d+'"]');
+      const end = endInp ? Number(endInp.value) : 18;
+      dayHours[d] = { start: start, end: end };
+    });
+    return dayHours;
+  }
 
   function renderBarberConfig(){
     document.getElementById('barberNameInput').value = config.barberName;
@@ -2795,6 +2838,7 @@
       const d = Number(chip.dataset.day);
       chip.classList.toggle('on', config.days.includes(d));
     });
+    renderDayHoursEditor();
     workingCutTypes = (config.cutTypes || []).map(ct=>({name:ct.name, price:ct.price||0}));
     renderCutTypesList();
     workingStaff = (config.staff || []).map(s=>({id:s.id, name:s.name||'', calendarId:s.calendarId||''}));
@@ -2884,7 +2928,27 @@
     const staff = workingStaff.length > 0 ? workingStaff.slice() : [{id:'default', name:'', calendarId:''}];
     const whatsappPhone = (document.getElementById('whatsappPhoneInput').value || '').replace(/\D/g, '');
 
-    const newConfig = { barberName:name, startHour:start, endHour:end, slotMin, days, cutTypes: workingCutTypes.slice(), staff, reminderHoursBefore, maxBookingsPerEmailPerDay, blocked: config.blocked, whatsappPhone };
+    const dayHours = collectDayHoursFromEditor();
+    // Fallback global = el rango más amplio de los días elegidos
+    let minStart = start, maxEnd = end;
+    Object.keys(dayHours).forEach(function(k){
+      if(dayHours[k].start < minStart) minStart = dayHours[k].start;
+      if(dayHours[k].end > maxEnd) maxEnd = dayHours[k].end;
+    });
+    const newConfig = {
+      barberName: name,
+      startHour: minStart,
+      endHour: maxEnd,
+      slotMin,
+      days,
+      dayHours,
+      cutTypes: workingCutTypes.slice(),
+      staff,
+      reminderHoursBefore,
+      maxBookingsPerEmailPerDay,
+      blocked: config.blocked,
+      whatsappPhone
+    };
     msgEl.innerHTML = '<div class="msg"><span class="spinner"></span>Guardando...</div>';
     try{
       const saved = await apiPost('saveConfig', newConfig);
@@ -2938,12 +3002,14 @@
 
   // ---------- barber: appointments list ----------
   function ticketHtml(a, withCancel){
+    const barber = staffNameById(a.staffId);
     return `
       <div class="ticket">
         <div class="ticket-main">
           <div class="ticket-name">${escapeHtml(a.client)}</div>
           <div class="ticket-date">${formatDate(a.date)} · ${a.time} · ${a.id}</div>
           <span class="ticket-cut-tag">${escapeHtml(a.cut || 'Sin especificar')}${a.price ? ' · $'+a.price : ''}</span>
+          ${barber ? `<div class="helper" style="margin-top:4px;">🪑 ${escapeHtml(barber)}</div>` : ''}
           ${withCancel ? `<div class="ticket-actions"><button class="btn secondary small" data-reschedule="${a.id}">Reprogramar</button> <button class="btn secondary small" data-cancel="${a.id}">Cancelar turno</button></div>` : ''}
         </div>
         <div class="ticket-stub">
@@ -3011,9 +3077,11 @@
     rescheduleTarget = apt;
     rescheduleSelectedTime = null;
     rescheduleStatus.innerHTML = '';
+    const bn = staffNameById(apt.staffId);
     document.getElementById('rescheduleDesc').textContent =
-      'Turno de ' + apt.client + ' (' + (apt.cut || 'sin especificar') + ') — actualmente el ' +
-      formatDate(apt.date) + ' a las ' + apt.time + '.';
+      'Turno de ' + apt.client + ' (' + (apt.cut || 'sin especificar') + ')' +
+      (bn ? ' con ' + bn : '') +
+      ' — actualmente el ' + formatDate(apt.date) + ' a las ' + apt.time + '.';
     rescheduleDateInput.min = today.toISOString().slice(0,10);
     rescheduleDateInput.value = apt.date;
     document.getElementById('rescheduleConfirmBtn').disabled = true;
@@ -3043,7 +3111,7 @@
     }
     rescheduleStatus.innerHTML = '';
 
-    const allSlots = generateSlotsForDate();
+    const allSlots = generateSlotsForDate(dateStr);
     const targetStaffId = rescheduleTarget.staffId || 'default';
     const takenTimes = appointments
       .filter(a => a.id !== rescheduleTarget.id && a.date === dateStr && (a.staffId || 'default') === targetStaffId)
