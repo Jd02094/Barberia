@@ -1538,7 +1538,7 @@
   // para que TODOS los visitantes puedan usar la página (y los enlaces de "gestionar mi
   // turno" que se mandan por correo) sin que cada uno tenga que configurarla a mano.
   // Si la dejás vacía, cada navegador la puede configurar igual con el botón ⚙.
-  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzFufQ6QQcirOJEwxDlLPd6ZmMKq8QzypoEU_kkZv4Wcks74OjHuKgx8mc1s-2mGsauhg/exec';
+  const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxt0Hqlhpx-wib4FMl23-YZZqLFaY9827rStXt6yWlTzRaa-QOBi2S_uFxDuShBO7Dk0g/exec';
 
   const defaultConfig = {
     barberName: 'LA ESTACION - BARBERIA',
@@ -1956,12 +1956,25 @@
   // ofreciendo la configuración anterior mientras está abierto.
   function applyServerData(data){
     config = {...defaultConfig, ...(data.config||{})};
-    if(!config.dayHours || typeof config.dayHours !== 'object'){
-      config.dayHours = Object.assign({}, defaultConfig.dayHours || {});
-    }
-    Object.keys(defaultConfig.dayHours || {}).forEach(function(k){
-      if(!config.dayHours[k]) config.dayHours[k] = Object.assign({}, defaultConfig.dayHours[k]);
+    // Horario oficial de respaldo (por si el servidor aún no guardó dayHours)
+    const officialDayHours = {
+      '0': { start: 7, end: 13 },
+      '1': { start: 8, end: 18 },
+      '3': { start: 7, end: 18 },
+      '4': { start: 8, end: 18 },
+      '5': { start: 8, end: 18 },
+      '6': { start: 8, end: 18 }
+    };
+    if(!config.dayHours || typeof config.dayHours !== 'object') config.dayHours = {};
+    Object.keys(officialDayHours).forEach(function(k){
+      if(!config.dayHours[k] || !isFinite(Number(config.dayHours[k].start))){
+        config.dayHours[k] = Object.assign({}, officialDayHours[k]);
+      }
     });
+    if(!Array.isArray(config.days) || config.days.length === 0){
+      config.days = [0, 1, 3, 4, 5, 6];
+    }
+    if(!config.slotMin) config.slotMin = 60;
     appointments = Array.isArray(data.appointments) ? data.appointments : [];
   }
 
